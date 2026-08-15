@@ -4,9 +4,18 @@ export type DriverStatus = 'AVAILABLE' | 'ON_TRIP' | 'OFF_DUTY';
 
 export type VehicleType = 'BUS' | 'POOL_CAR' | 'VAN';
 
-export type VehicleStatus = 'AVAILABLE' | 'IN_USE' | 'UNDER_MAINTENANCE' | 'DECOMMISSIONED' | 'IN_INSPECTION';
+export type VehicleStatus = 'AVAILABLE' | 'RESERVED' | 'IN_USE' | 'RETURNED' | 'INSPECTION_REQUIRED' | 'UNDER_MAINTENANCE' | 'DECOMMISSIONED' | 'IN_INSPECTION';
 
-export type TripStatus = 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+export type TripStatus = 
+  | 'SCHEDULED' 
+  | 'AWAITING_DRIVER_CONFIRMATION' 
+  | 'BOARDING' 
+  | 'EN_ROUTE' 
+  | 'ARRIVED' 
+  | 'EMPTYING' 
+  | 'COMPLETED' 
+  | 'CANCELLED' 
+  | 'IN_PROGRESS';
 
 export type BookingStatus = 
   | 'AUTO_APPROVED' 
@@ -43,6 +52,8 @@ export interface Location {
   longitude: number;
 }
 
+export type RiderCategory = 'AGL_WORKER' | 'EXTERNAL_RIDER';
+
 export interface Employee {
   id: string;
   entraId?: string;
@@ -51,6 +62,7 @@ export interface Employee {
   lastName: string;
   phone: string;
   role: Role;
+  riderCategory?: RiderCategory;
   departmentId: string;
   locationId: string;
   managerId?: string;
@@ -105,6 +117,7 @@ export interface BusBooking {
   id: string;
   busTripId: string;
   employeeId: string;
+  seatNumber?: string;
   passengerCount: number;
   status: BookingStatus;
   driverComment?: string;

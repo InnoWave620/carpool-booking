@@ -55,8 +55,14 @@ export const Navbar: React.FC<NavbarProps> = ({ onUserChange }) => {
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-lg font-bold tracking-tight text-white">Transport Hub</h1>
-              <span className="hidden sm:inline-block text-[10px] uppercase font-extrabold tracking-wider bg-amber-400/20 text-[#EED58E] px-2 py-0.5 rounded-full border border-amber-400/30">
-                Namibia
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] uppercase font-extrabold tracking-wider bg-emerald-400/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-400/30">
+                <svg className="w-2.5 h-2.5" viewBox="0 0 23 23">
+                  <path fill="#f35325" d="M1 1h10v10H1z"/>
+                  <path fill="#81bc06" d="M12 1h10v10H12z"/>
+                  <path fill="#05a6f0" d="M1 12h10v10H1z"/>
+                  <path fill="#ffba08" d="M12 12h10v10H12z"/>
+                </svg>
+                Microsoft Entra ID
               </span>
             </div>
             <p className="text-xs text-slate-300 hidden sm:flex items-center gap-1">
@@ -152,6 +158,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onUserChange }) => {
                       )}
                     </button>
                   ))}
+                </div>
+
+                <div className="pt-2 mt-2 border-t border-slate-100">
+                  <a
+                    href="/login"
+                    className="w-full text-left px-3 py-2 rounded-lg flex items-center space-x-2 text-rose-600 hover:bg-rose-50 font-bold text-xs transition-colors"
+                  >
+                    <span>Sign Out (Microsoft Session)</span>
+                  </a>
                 </div>
               </div>
             )}

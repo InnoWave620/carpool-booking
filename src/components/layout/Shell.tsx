@@ -32,6 +32,10 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
     setUser(getActiveUser());
   }, []);
 
+  if (pathname === '/login') {
+    return <>{children}</>;
+  }
+
   if (!user) return null;
 
   const isDriver = user.role === 'DRIVER' || user.role === 'SUPER_ADMIN';
@@ -39,15 +43,12 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
   const isFleetAdmin = user.role === 'FLEET_ADMIN' || user.role === 'SUPER_ADMIN';
   const isAdmin = user.role === 'SUPER_ADMIN';
 
-  const navItems = [
-    { href: '/', label: 'Dashboard', icon: LayoutDashboard, show: true },
-    { href: '/bus-schedule', label: 'Bus Schedule', icon: Bus, show: true },
-    { href: '/my-bookings', label: 'My Bookings', icon: Calendar, show: true },
-    { href: '/driver-console', label: 'Driver Console', icon: ClipboardList, show: isDriver, badge: 'Phase 1' },
-    { href: '/pool-vehicles', label: 'Pool Vehicles', icon: Car, show: true, badge: 'Phase 2' },
-    { href: '/approvals', label: 'Manager Inbox', icon: CheckSquare, show: isManager },
-    { href: '/inspections', label: 'Return Inspections', icon: ShieldCheck, show: isFleetAdmin },
-    { href: '/admin', label: 'Fleet Admin', icon: Settings, show: isAdmin },
+  const navItems: Array<{ href: string; label: string; icon: any; show: boolean; badge?: string }> = [
+    { href: '/employee/dashboard', label: 'Rider Portal', icon: LayoutDashboard, show: true, badge: 'Role' },
+    { href: '/driver/dashboard', label: 'Driver Console', icon: ClipboardList, show: true, badge: 'Role' },
+    { href: '/manager/dashboard', label: 'Manager Hub', icon: CheckSquare, show: true, badge: 'Role' },
+    { href: '/inspector/dashboard', label: 'Inspector Gate', icon: ShieldCheck, show: true, badge: 'Role' },
+    { href: '/admin/dashboard', label: 'Admin & Business Rules', icon: Settings, show: true, badge: 'Admin' },
   ];
 
   return (
@@ -58,35 +59,72 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
         
         {/* Desktop Sidebar Navigation */}
         <aside className="hidden lg:block w-64 p-4 border-r border-slate-200/80 bg-white min-h-[calc(100vh-4rem)]">
-          <div className="space-y-1">
-            <p className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Navigation</p>
-            {navItems.filter(item => item.show).map((item) => {
-              const Icon = item.icon;
-              const active = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all ${
-                    active 
-                      ? 'bg-[#1C355E] text-white shadow-md shadow-[#1C355E]/15 font-semibold' 
-                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Icon className={`w-4 h-4 ${active ? 'text-[#EED58E]' : 'text-slate-400'}`} />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-extrabold ${
-                      active ? 'bg-amber-400/20 text-[#EED58E]' : 'bg-slate-100 text-slate-500'
-                    }`}>
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
+          <div className="space-y-4">
+            <div>
+              <p className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Management & Admin</p>
+              <div className="space-y-1">
+                {navItems.filter(item => item.show && ['/admin', '/approvals', '/inspections'].includes(item.href)).map((item) => {
+                  const Icon = item.icon;
+                  const active = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all ${
+                        active 
+                          ? 'bg-[#1C355E] text-white shadow-md shadow-[#1C355E]/15 font-semibold' 
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Icon className={`w-4 h-4 ${active ? 'text-[#EED58E]' : 'text-slate-400'}`} />
+                        <span>{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-extrabold ${
+                          active ? 'bg-amber-400/20 text-[#EED58E]' : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <p className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Fleet Dispatch & Schedules</p>
+              <div className="space-y-1">
+                {navItems.filter(item => item.show && ['/', '/bus-schedule', '/pool-vehicles', '/driver-console', '/my-bookings'].includes(item.href)).map((item) => {
+                  const Icon = item.icon;
+                  const active = pathname === item.href;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-medium text-sm transition-all ${
+                        active 
+                          ? 'bg-[#1C355E] text-white shadow-md shadow-[#1C355E]/15 font-semibold' 
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Icon className={`w-4 h-4 ${active ? 'text-[#EED58E]' : 'text-slate-400'}`} />
+                        <span>{item.label}</span>
+                      </div>
+                      {item.badge && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-extrabold ${
+                          active ? 'bg-amber-400/20 text-[#EED58E]' : 'bg-slate-100 text-slate-500'
+                        }`}>
+                          {item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Persona Card Widget in Sidebar */}

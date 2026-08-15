@@ -20,9 +20,18 @@ const TURQUOISE = '#2DD4BF';
 const GRAY_BG = '#F8FAFC';
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authMode, setAuthMode] = useState<'SIGN_IN' | 'SIGN_UP'>('SIGN_IN');
+  const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [activeUser, setActiveUser] = useState<{ name: string; email: string; role: string; avatar: string }>({
+    name: 'Petrus Haimbodi',
+    email: 'petrus.haimbodi@aglgroup.com',
+    role: 'EMPLOYEE',
+    avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=200',
+  });
+
   const [activeTab, setActiveTab] = useState<'BUS' | 'DRIVER' | 'POOL' | 'APPROVALS' | 'INSPECTION'>('BUS');
-  
-  // Active Persona Switcher for testing in Emulator
   const [role, setRole] = useState<'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN'>('EMPLOYEE');
 
   // State models
@@ -41,6 +50,20 @@ export default function App() {
   const [vehicleReturned, setVehicleReturned] = useState(false);
   const [inspectionPassed, setInspectionPassed] = useState(false);
 
+  const handleMobileLogin = (empName?: string, empEmail?: string, empRole?: string, empAvatar?: string) => {
+    setActiveUser({
+      name: empName || 'Petrus Haimbodi',
+      email: empEmail || (emailInput || 'petrus.haimbodi@aglgroup.com'),
+      role: empRole || 'EMPLOYEE',
+      avatar: empAvatar || 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=200',
+    });
+    if (empRole) {
+      setRole(empRole as any);
+    }
+    setIsAuthenticated(true);
+    Alert.alert('Signed In', `Welcome back, ${empName || 'Petrus'}! Signed in via Microsoft Entra ID.`);
+  };
+
   const handleBookShuttle = () => {
     if (availableSeats < seatsRequested) {
       Alert.alert('Seats Unavailable', 'Not enough seats remaining on this shuttle.');
@@ -52,6 +75,126 @@ export default function App() {
     setBookingModalVisible(false);
     Alert.alert('Success', 'Shuttle seat reserved! Status: AUTO_APPROVED (≥12h notice).');
   };
+
+  // MOBILE AUTHENTICATION SCREEN (Sign In / Sign Up)
+  if (!isAuthenticated) {
+    return (
+      <SafeAreaView style={styles.authContainer}>
+        <StatusBar barStyle="light-content" backgroundColor={NAVY} />
+
+        <ScrollView contentContainerStyle={styles.authScroll}>
+          {/* Brand Banner Header */}
+          <View style={styles.authHeader}>
+            <View style={styles.authLogoBox}>
+              <Text style={styles.authLogoText}>AGL</Text>
+            </View>
+            <Text style={styles.authTitle}>AGL Transport Hub</Text>
+            <Text style={styles.authSubtitle}>Namibia • Walvis Bay Mobile</Text>
+            <View style={styles.authBadge}>
+              <Text style={styles.authBadgeText}>🔒 Microsoft Entra ID Protected</Text>
+            </View>
+          </View>
+
+          {/* Auth Card */}
+          <View style={styles.authCard}>
+            {/* Tab Switcher: Sign In vs Sign Up */}
+            <View style={styles.authTabRow}>
+              <TouchableOpacity 
+                style={[styles.authTabBtn, authMode === 'SIGN_IN' && styles.authTabBtnActive]}
+                onPress={() => setAuthMode('SIGN_IN')}
+              >
+                <Text style={[styles.authTabText, authMode === 'SIGN_IN' && styles.authTabTextActive]}>Sign In</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.authTabBtn, authMode === 'SIGN_UP' && styles.authTabBtnActive]}
+                onPress={() => setAuthMode('SIGN_UP')}
+              >
+                <Text style={[styles.authTabText, authMode === 'SIGN_UP' && styles.authTabTextActive]}>Sign Up (Rider)</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Microsoft Entra ID Primary Button */}
+            <TouchableOpacity 
+              style={styles.msAuthBtn}
+              onPress={() => handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE')}
+            >
+              <Text style={styles.msAuthBtnText}>Sign In with Microsoft Entra ID</Text>
+            </TouchableOpacity>
+
+            <View style={styles.dividerRow}>
+              <View style={styles.dividerLine} />
+              <Text style={styles.dividerText}>OR LOGIN WITH CREDENTIALS</Text>
+              <View style={styles.dividerLine} />
+            </View>
+
+            {/* Input Form */}
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Corporate Email Address</Text>
+              <TextInput
+                style={styles.inputField}
+                placeholder="name@aglgroup.com"
+                placeholderTextColor="#94A3B8"
+                value={emailInput}
+                onChangeText={setEmailInput}
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Password</Text>
+              <TextInput
+                style={styles.inputField}
+                placeholder="••••••••••••"
+                placeholderTextColor="#94A3B8"
+                secureTextEntry
+                value={passwordInput}
+                onChangeText={setPasswordInput}
+              />
+            </View>
+
+            <TouchableOpacity 
+              style={styles.submitAuthBtn}
+              onPress={() => handleMobileLogin()}
+            >
+              <Text style={styles.submitAuthBtnText}>
+                {authMode === 'SIGN_IN' ? 'Sign In to Account' : 'Register New Rider Account'}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Quick Mobile Persona Login Options */}
+            <Text style={styles.quickPersonaTitle}>QUICK PERSONA LOGIN (MOBILE TEST)</Text>
+            <View style={styles.personaGrid}>
+              <TouchableOpacity 
+                style={styles.personaChip}
+                onPress={() => handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE')}
+              >
+                <Text style={styles.personaChipText}>🧑‍💼 Petrus (Rider)</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.personaChip}
+                onPress={() => handleMobileLogin('Klaus Schneider', 'manager.logistics@aglgroup.com', 'MANAGER')}
+              >
+                <Text style={styles.personaChipText}>👔 Klaus (Manager)</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.personaChip}
+                onPress={() => handleMobileLogin('Johannes Nangolo', 'driver.bus1@aglgroup.com', 'DRIVER')}
+              >
+                <Text style={styles.personaChipText}>🚌 Johannes (Driver)</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.personaChip}
+                onPress={() => handleMobileLogin('Senzo Shinga', 'admin.namibia@aglgroup.com', 'SUPER_ADMIN')}
+              >
+                <Text style={styles.personaChipText}>⚙️ Senzo (Admin)</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -65,21 +208,33 @@ export default function App() {
           </View>
           <View>
             <Text style={styles.headerTitle}>AGL Transport Hub</Text>
-            <Text style={styles.headerSub}>Namibia • Walvis Bay Mobile</Text>
+            <Text style={styles.headerSub}>🔒 Microsoft Entra ID • Walvis Bay</Text>
           </View>
         </View>
 
-        {/* Emulator Role Switcher Pill */}
-        <TouchableOpacity 
-          style={styles.rolePill}
-          onPress={() => {
-            const roles: Array<'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN'> = ['EMPLOYEE', 'DRIVER', 'MANAGER', 'FLEET_ADMIN'];
-            const nextIdx = (roles.indexOf(role) + 1) % roles.length;
-            setRole(roles[nextIdx]);
-          }}
-        >
-          <Text style={styles.rolePillText}>Role: {role}</Text>
-        </TouchableOpacity>
+        {/* Emulator Role Switcher Pill & Sign Out */}
+        <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+          <TouchableOpacity 
+            style={styles.rolePill}
+            onPress={() => {
+              const roles: Array<'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN'> = ['EMPLOYEE', 'DRIVER', 'MANAGER', 'FLEET_ADMIN'];
+              const nextIdx = (roles.indexOf(role) + 1) % roles.length;
+              setRole(roles[nextIdx]);
+            }}
+          >
+            <Text style={styles.rolePillText}>Role: {role}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={styles.logoutBtn}
+            onPress={() => {
+              setIsAuthenticated(false);
+              Alert.alert('Signed Out', 'You have been signed out of your Microsoft Entra ID session.');
+            }}
+          >
+            <Text style={styles.logoutBtnText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Main Native Screen Content */}
@@ -784,6 +939,192 @@ const styles = StyleSheet.create({
   closeBtnText: {
     color: '#64748B',
     fontSize: 12,
+    fontWeight: 'bold',
+  },
+  // Mobile Authentication Styles
+  authContainer: {
+    flex: 1,
+    backgroundColor: NAVY,
+  },
+  authScroll: {
+    padding: 20,
+    justifyContent: 'center',
+    minHeight: '100%',
+  },
+  authHeader: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  authLogoBox: {
+    width: 60,
+    height: 60,
+    borderRadius: 18,
+    backgroundColor: '#FFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: GOLD,
+  },
+  authLogoText: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: NAVY,
+  },
+  authTitle: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#FFF',
+  },
+  authSubtitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: GOLD,
+    marginTop: 2,
+  },
+  authBadge: {
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 20,
+    backgroundColor: 'rgba(45, 212, 191, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(45, 212, 191, 0.3)',
+  },
+  authBadgeText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: TURQUOISE,
+  },
+  authCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 24,
+    padding: 20,
+    elevation: 10,
+  },
+  authTabRow: {
+    flexDirection: 'row',
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 16,
+  },
+  authTabBtn: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  authTabBtnActive: {
+    backgroundColor: '#FFF',
+    elevation: 2,
+  },
+  authTabText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  authTabTextActive: {
+    color: NAVY,
+    fontWeight: '800',
+  },
+  msAuthBtn: {
+    backgroundColor: '#000',
+    borderRadius: 14,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  msAuthBtnText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E2E8F0',
+  },
+  dividerText: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: '#94A3B8',
+    marginHorizontal: 8,
+  },
+  inputGroup: {
+    marginBottom: 12,
+  },
+  inputLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#334155',
+    marginBottom: 4,
+  },
+  inputField: {
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: '#0F172A',
+    backgroundColor: '#F8FAFC',
+  },
+  submitAuthBtn: {
+    backgroundColor: NAVY,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  submitAuthBtnText: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  quickPersonaTitle: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#94A3B8',
+    marginTop: 16,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  personaGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  personaChip: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  personaChipText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#334155',
+  },
+  logoutBtn: {
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.4)',
+  },
+  logoutBtnText: {
+    color: '#F87171',
+    fontSize: 10,
     fontWeight: 'bold',
   },
 });
