@@ -1,0 +1,190 @@
+datasource db {
+  provider = "sqlserver"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Department {
+  id        String     @id @default(uuid())
+  name      String
+  code      String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  employees Employee[]
+}
+
+model Location {
+  id               String      @id @default(uuid())
+  name             String
+  code             String      @unique
+  address          String
+  latitude         Float
+  longitude        Float
+  createdAt        DateTime    @default(now())
+  employees        Employee[]
+  vehicles         Vehicle[]
+  originTrips      BusTrip[]   @relation("OriginLocation")
+  destinationTrips BusTrip[]   @relation("DestinationLocation")
+}
+
+model Employee {
+  id               String               @id @default(uuid())
+  entraId          String?              @unique
+  email            String               @unique
+  firstName        String
+  lastName         String
+  phone            String
+  role             String               @default("EMPLOYEE") // EMPLOYEE, DRIVER, MANAGER, FLEET_ADMIN, SUPER_ADMIN
+  departmentId     String
+  locationId       String
+  managerId        String?
+  isActive         Boolean              @default(true)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  department       Department           @relation(fields: [departmentId], references: [id])
+  location         Location             @relation(fields: [locationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  manager          Employee?            @relation("ManagerReports", fields: [managerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  reports          Employee[]           @relation("ManagerReports")
+  driver           Driver?
+  busBookings      BusBooking[]
+  poolRequests     PoolVehicleRequest[] @relation("Requester")
+  managedRequests  PoolVehicleRequest[] @relation("Approver")
+  inspections      VehicleInspection[]
+  assignedTasks    ApprovalTask[]        @relation("Assignee")
+  requestedTasks   ApprovalTask[]        @relation("RequesterTask")
+  auditEvents      AuditEvent[]
+}
+
+model Driver {
+  id              String       @id @default(uuid())
+  employeeId      String       @unique
+  licenseNumber   String
+  licenseCategory String
+  licenseExpiry   DateTime
+  status          String       @default("AVAILABLE") // AVAILABLE, ON_TRIP, OFF_DUTY
+
+  employee        Employee     @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  busTrips        BusTrip[]
+}
+
+model Vehicle {
+  id                 String               @id @default(uuid())
+  registrationNumber String               @unique
+  make               String
+  model              String
+  year               Int
+  type               String               // BUS, POOL_CAR, VAN
+  capacity           Int
+  locationId         String
+  status             String               @default("AVAILABLE") // AVAILABLE, IN_USE, UNDER_MAINTENANCE, DECOMMISSIONED
+  fuelType           String               @default("Diesel")
+  mileage            Int                  @default(0)
+  createdAt          DateTime             @default(now())
+
+  location           Location             @relation(fields: [locationId], references: [id])
+  busTrips           BusTrip[]
+  poolRequests       PoolVehicleRequest[]
+  inspections        VehicleInspection[]
+}
+
+model BusTrip {
+  id                    String        @id @default(uuid())
+  vehicleId             String
+  driverId              String
+  originLocationId      String
+  destinationLocationId String
+  departureTime         DateTime
+  arrivalTime           DateTime
+  totalSeats            Int
+  availableSeats        Int
+  status                String        @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  cutoffHours           Int           @default(12)
+  createdAt             DateTime      @default(now())
+
+  vehicle               Vehicle       @relation(fields: [vehicleId], references: [id])
+  driver                Driver        @relation(fields: [driverId], references: [id])
+  originLocation        Location      @relation("OriginLocation", fields: [originLocationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  destinationLocation   Location      @relation("DestinationLocation", fields: [destinationLocationId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  bookings              BusBooking[]
+}
+
+model BusBooking {
+  id              String        @id @default(uuid())
+  busTripId       String
+  employeeId      String
+  passengerCount  Int           @default(1)
+  status          String        // AUTO_APPROVED, PENDING_DRIVER_APPROVAL, APPROVED_BY_DRIVER, REJECTED_BY_DRIVER, CANCELLED
+  driverComment   String?
+  bookedAt        DateTime      @default(now())
+
+  busTrip         BusTrip       @relation(fields: [busTripId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  employee        Employee      @relation(fields: [employeeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model PoolVehicleRequest {
+  id              String             @id @default(uuid())
+  requesterId     String
+  approverId      String
+  vehicleId       String?
+  purpose         String
+  startDateTime   DateTime
+  endDateTime     DateTime
+  status          String             @default("PENDING_MANAGER_APPROVAL") // PENDING_MANAGER_APPROVAL, APPROVED, REJECTED, CHECKED_OUT, RETURNED, CANCELLED
+  rejectionReason String?
+  createdAt       DateTime           @default(now())
+
+  requester       Employee           @relation("Requester", fields: [requesterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  approver        Employee           @relation("Approver", fields: [approverId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  vehicle         Vehicle?           @relation(fields: [vehicleId], references: [id])
+  inspection      VehicleInspection?
+}
+
+model VehicleInspection {
+  id                   String             @id @default(uuid())
+  poolVehicleRequestId String             @unique
+  vehicleId            String
+  inspectorId          String
+  inspectionType       String             @default("POST_RETURN") // PRE_TRIP, POST_RETURN
+  odometerReading      Int
+  fuelLevelPercent     Int
+  cleanlinessStatus    String
+  damageNotes          String?
+  photoUrls            String             @default("[]")
+  passStatus           String             @default("PASSED") // PASSED, FLAGGED_NEEDS_SERVICE
+  inspectedAt          DateTime           @default(now())
+
+  poolVehicleRequest   PoolVehicleRequest @relation(fields: [poolVehicleRequestId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  vehicle              Vehicle            @relation(fields: [vehicleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  inspector            Employee           @relation(fields: [inspectorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ApprovalTask {
+  id          String     @id @default(uuid())
+  requestType String
+  referenceId String
+  requesterId String
+  assigneeId  String
+  status      String     @default("PENDING")
+  createdAt   DateTime   @default(now())
+  actionedAt  DateTime?
+
+  requester   Employee   @relation("RequesterTask", fields: [requesterId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  assignee    Employee   @relation("Assignee", fields: [assigneeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model AuditEvent {
+  id          String   @id @default(uuid())
+  performerId String
+  action      String
+  entityType  String
+  entityId    String
+  metadata    String?
+  ipAddress   String?
+  userAgent   String?
+  timestamp   DateTime @default(now())
+
+  performer   Employee @relation(fields: [performerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
