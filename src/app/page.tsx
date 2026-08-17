@@ -36,19 +36,6 @@ export default function DashboardPage() {
   useEffect(() => {
     const active = getActiveUser();
     setUser(active);
-
-    // Auto Role-based router redirect
-    if (active) {
-      if (active.role === 'DRIVER') {
-        window.location.href = '/driver/dashboard';
-      } else if (active.role === 'MANAGER') {
-        window.location.href = '/manager/dashboard';
-      } else if (active.role === 'SUPER_ADMIN') {
-        window.location.href = '/admin/dashboard';
-      } else {
-        window.location.href = '/employee/dashboard';
-      }
-    }
   }, []);
 
   if (!user) return null;

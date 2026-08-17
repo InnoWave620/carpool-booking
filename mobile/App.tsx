@@ -543,27 +543,22 @@ export default function App() {
       <View style={styles.tabBar}>
         <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('BUS')}>
           <Text style={[styles.tabIcon, activeTab === 'BUS' && styles.tabActive]}>🚌</Text>
-          <Text style={[styles.tabLabel, activeTab === 'BUS' && styles.tabActive]}>Rider</Text>
+          <Text style={[styles.tabLabel, activeTab === 'BUS' && styles.tabActive]}>Shuttle</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('POOL')}>
+          <Text style={[styles.tabIcon, activeTab === 'POOL' && styles.tabActive]}>🚗</Text>
+          <Text style={[styles.tabLabel, activeTab === 'POOL' && styles.tabActive]}>Pool Fleet</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('APPROVALS')}>
+          <Text style={[styles.tabIcon, activeTab === 'APPROVALS' && styles.tabActive]}>☑️</Text>
+          <Text style={[styles.tabLabel, activeTab === 'APPROVALS' && styles.tabActive]}>Approvals</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('DRIVER')}>
           <Text style={[styles.tabIcon, activeTab === 'DRIVER' && styles.tabActive]}>📋</Text>
           <Text style={[styles.tabLabel, activeTab === 'DRIVER' && styles.tabActive]}>Driver</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('POOL')}>
-          <Text style={[styles.tabIcon, activeTab === 'POOL' && styles.tabActive]}>🚗</Text>
-          <Text style={[styles.tabLabel, activeTab === 'POOL' && styles.tabActive]}>Pool</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('APPROVALS')}>
-          <Text style={[styles.tabIcon, activeTab === 'APPROVALS' && styles.tabActive]}>☑️</Text>
-          <Text style={[styles.tabLabel, activeTab === 'APPROVALS' && styles.tabActive]}>Manager</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('INSPECTION')}>
-          <Text style={[styles.tabIcon, activeTab === 'INSPECTION' && styles.tabActive]}>🛡️</Text>
-          <Text style={[styles.tabLabel, activeTab === 'INSPECTION' && styles.tabActive]}>Inspect</Text>
         </TouchableOpacity>
       </View>
 
