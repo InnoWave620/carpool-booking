@@ -159,7 +159,7 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
 
       {/* Mobile Bottom Navigation Bar (App Experience for Phones) */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 px-2 py-1.5 shadow-2xl flex justify-around items-center">
-        {navItems.filter(item => item.show).slice(0, 5).map((item) => {
+        {roleNavItems.filter(item => item.show).slice(0, 5).map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
           return (

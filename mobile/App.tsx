@@ -74,16 +74,16 @@ export default function App() {
     Alert.alert('Signed In', `Welcome back, ${empName || 'Petrus'}! Signed in via Microsoft Entra ID.`);
   };
 
-  const handleBookShuttle = () => {
-    if (availableSeats < seatsRequested) {
+  const handleBookShuttle = (time: string = '08:00 AM') => {
+    if (availableSeats < 1) {
       Alert.alert('Seats Unavailable', 'Not enough seats remaining on this shuttle.');
       return;
     }
 
-    setAvailableSeats(prev => prev - seatsRequested);
-    setMyBookings(prev => [`08:00 HQ -> WMT (${seatsRequested} seats)`, ...prev]);
+    setAvailableSeats(prev => prev - 1);
+    setMyBookings(prev => [`${time} Departure (Seat ${selectedSeatNumber})`, ...prev]);
     setBookingModalVisible(false);
-    Alert.alert('Success', 'Shuttle seat reserved! Status: AUTO_APPROVED (≥12h notice).');
+    Alert.alert('Success', `Shuttle seat #${selectedSeatNumber} reserved! Status: AUTO_APPROVED.`);
   };
 
   // MOBILE AUTHENTICATION SCREEN (Sign In / Sign Up)
@@ -253,7 +253,7 @@ export default function App() {
               style={[styles.dropdownItem, role === 'EMPLOYEE' && styles.dropdownItemActive]}
               onPress={() => {
                 handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE');
-                setActiveTab('SHUTTLE');
+                setActiveTab('RIDER');
                 setShowDropdown(false);
               }}
             >
@@ -270,7 +270,7 @@ export default function App() {
               style={[styles.dropdownItem, role === 'MANAGER' && styles.dropdownItemActive]}
               onPress={() => {
                 handleMobileLogin('Klaus Schneider', 'manager.logistics@aglgroup.com', 'MANAGER');
-                setActiveTab('POOL');
+                setActiveTab('MANAGER');
                 setShowDropdown(false);
               }}
             >
@@ -304,7 +304,7 @@ export default function App() {
               style={[styles.dropdownItem, role === 'FLEET_ADMIN' && styles.dropdownItemActive]}
               onPress={() => {
                 handleMobileLogin('Senzo Shinga', 'admin.namibia@aglgroup.com', 'SUPER_ADMIN');
-                setActiveTab('SHUTTLE');
+                setActiveTab('ADMIN');
                 setShowDropdown(false);
               }}
             >
@@ -908,6 +908,11 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  headerSub: {
+    color: GOLD,
+    fontSize: 10,
+    fontWeight: '600',
   },
   avatarDropdownBtn: {
     flexDirection: 'row',
