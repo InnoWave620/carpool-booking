@@ -61,7 +61,7 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       <Navbar onUserChange={(updated) => setUser(updated)} />
 
-      <div className="flex-1 max-w-7xl w-full mx-auto flex">
+      <div className="flex-1 w-full flex">
         
         {/* Desktop Sidebar Navigation */}
         <aside className="hidden lg:block w-64 p-4 border-r border-slate-200/80 bg-white min-h-[calc(100vh-4rem)]">

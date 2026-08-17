@@ -123,7 +123,7 @@ export default function AdminDashboard() {
 
       {/* TAB 3: BUSINESS RULES ENGINE */}
       {activeTab === 'BUSINESS_RULES' && (
-        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6 max-w-xl">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6 max-w-3xl">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <h2 className="text-base font-black text-[#1C355E]">Transport Business Rules Engine</h2>
           </div>
