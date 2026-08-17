@@ -33,6 +33,7 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState<'SHUTTLE' | 'POOL' | 'DRIVER'>('SHUTTLE');
   const [role, setRole] = useState<'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN'>('EMPLOYEE');
+  const [showDropdown, setShowDropdown] = useState(false);
 
   // State models
   const [availableSeats, setAvailableSeats] = useState(16);
@@ -217,63 +218,117 @@ export default function App() {
           </View>
           <View>
             <Text style={styles.headerTitle}>AGL Transport Hub</Text>
-            <Text style={styles.headerSub}>🔒 Microsoft Entra ID • {activeUser.name}</Text>
+            <Text style={styles.headerSub}>🔒 Microsoft Entra ID • Walvis Bay</Text>
           </View>
         </View>
 
+        {/* User Profile Avatar & Dropdown Trigger */}
         <TouchableOpacity 
-          style={styles.logoutBtn}
-          onPress={() => {
-            setIsAuthenticated(false);
-            Alert.alert('Signed Out', 'You have been signed out of your Microsoft Entra ID session.');
-          }}
+          style={styles.avatarDropdownBtn}
+          onPress={() => setShowDropdown(true)}
         >
-          <Text style={styles.logoutBtnText}>Sign Out</Text>
+          <Image 
+            source={{ uri: activeUser.avatar }} 
+            style={styles.userAvatarImg} 
+          />
+          <Text style={styles.dropdownChevron}>▼</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Dedicated Mobile Persona Switcher Bar */}
-      <View style={styles.personaBar}>
-        <Text style={styles.personaBarLabel}>TEST PERSONA:</Text>
+      {/* User Persona Dropdown Modal Menu */}
+      <Modal visible={showDropdown} transparent animationType="fade">
+        <TouchableOpacity 
+          style={styles.dropdownBackdrop}
+          activeOpacity={1}
+          onPress={() => setShowDropdown(false)}
+        >
+          <View style={styles.dropdownMenuBox}>
+            <View style={styles.dropdownHeader}>
+              <Text style={styles.dropdownHeaderTitle}>SWITCH PERSONA / TEST ROLE</Text>
+              <Text style={styles.dropdownHeaderSub}>Select corporate user account</Text>
+            </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
-          <TouchableOpacity 
-            style={[styles.personaPill, role === 'EMPLOYEE' && styles.personaPillActive]}
-            onPress={() => {
-              handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE');
-              setActiveTab('SHUTTLE');
-            }}
-          >
-            <Text style={[styles.personaPillText, role === 'EMPLOYEE' && styles.personaPillTextActive]}>
-              🧑‍💼 Rider (Petrus)
-            </Text>
-          </TouchableOpacity>
+            {/* Persona 1: Rider (Petrus) */}
+            <TouchableOpacity 
+              style={[styles.dropdownItem, role === 'EMPLOYEE' && styles.dropdownItemActive]}
+              onPress={() => {
+                handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE');
+                setActiveTab('SHUTTLE');
+                setShowDropdown(false);
+              }}
+            >
+              <Image source={{ uri: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=200' }} style={styles.itemAvatar} />
+              <View style={styles.itemTextCol}>
+                <Text style={styles.itemNameText}>Petrus Haimbodi</Text>
+                <Text style={styles.itemRoleText}>EMPLOYEE • Rider</Text>
+              </View>
+              {role === 'EMPLOYEE' && <Text style={styles.checkIcon}>✓</Text>}
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.personaPill, role === 'MANAGER' && styles.personaPillActive]}
-            onPress={() => {
-              handleMobileLogin('Klaus Schneider', 'manager.logistics@aglgroup.com', 'MANAGER');
-              setActiveTab('POOL');
-            }}
-          >
-            <Text style={[styles.personaPillText, role === 'MANAGER' && styles.personaPillTextActive]}>
-              👔 Manager (Klaus)
-            </Text>
-          </TouchableOpacity>
+            {/* Persona 2: Manager (Klaus) */}
+            <TouchableOpacity 
+              style={[styles.dropdownItem, role === 'MANAGER' && styles.dropdownItemActive]}
+              onPress={() => {
+                handleMobileLogin('Klaus Schneider', 'manager.logistics@aglgroup.com', 'MANAGER');
+                setActiveTab('POOL');
+                setShowDropdown(false);
+              }}
+            >
+              <Image source={{ uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200' }} style={styles.itemAvatar} />
+              <View style={styles.itemTextCol}>
+                <Text style={styles.itemNameText}>Klaus Schneider</Text>
+                <Text style={styles.itemRoleText}>MANAGER • Logistics Lead</Text>
+              </View>
+              {role === 'MANAGER' && <Text style={styles.checkIcon}>✓</Text>}
+            </TouchableOpacity>
 
-          <TouchableOpacity 
-            style={[styles.personaPill, role === 'DRIVER' && styles.personaPillActive]}
-            onPress={() => {
-              handleMobileLogin('Johannes Nangolo', 'driver.bus1@aglgroup.com', 'DRIVER');
-              setActiveTab('DRIVER');
-            }}
-          >
-            <Text style={[styles.personaPillText, role === 'DRIVER' && styles.personaPillTextActive]}>
-              🚌 Driver (Johannes)
-            </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
+            {/* Persona 3: Driver (Johannes) */}
+            <TouchableOpacity 
+              style={[styles.dropdownItem, role === 'DRIVER' && styles.dropdownItemActive]}
+              onPress={() => {
+                handleMobileLogin('Johannes Nangolo', 'driver.bus1@aglgroup.com', 'DRIVER');
+                setActiveTab('DRIVER');
+                setShowDropdown(false);
+              }}
+            >
+              <Image source={{ uri: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200' }} style={styles.itemAvatar} />
+              <View style={styles.itemTextCol}>
+                <Text style={styles.itemNameText}>Johannes Nangolo</Text>
+                <Text style={styles.itemRoleText}>DRIVER • Shuttle Bus 01</Text>
+              </View>
+              {role === 'DRIVER' && <Text style={styles.checkIcon}>✓</Text>}
+            </TouchableOpacity>
+
+            {/* Persona 4: Admin (Senzo) */}
+            <TouchableOpacity 
+              style={[styles.dropdownItem, role === 'FLEET_ADMIN' && styles.dropdownItemActive]}
+              onPress={() => {
+                handleMobileLogin('Senzo Shinga', 'admin.namibia@aglgroup.com', 'SUPER_ADMIN');
+                setActiveTab('SHUTTLE');
+                setShowDropdown(false);
+              }}
+            >
+              <Image source={{ uri: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200' }} style={styles.itemAvatar} />
+              <View style={styles.itemTextCol}>
+                <Text style={styles.itemNameText}>Senzo Shinga</Text>
+                <Text style={styles.itemRoleText}>SUPER ADMIN • Operations</Text>
+              </View>
+              {role === 'FLEET_ADMIN' && <Text style={styles.checkIcon}>✓</Text>}
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.dropdownSignOutBtn}
+              onPress={() => {
+                setShowDropdown(false);
+                setIsAuthenticated(false);
+                Alert.alert('Signed Out', 'You have been signed out of your Microsoft Entra ID session.');
+              }}
+            >
+              <Text style={styles.dropdownSignOutText}>Sign Out (Microsoft Session)</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       {/* Main Native Screen Content */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -766,37 +821,111 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  personaBar: {
-    backgroundColor: '#1E293B',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+  avatarDropdownBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#334155',
+    gap: 6,
+    backgroundColor: '#25467A',
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(238, 213, 142, 0.4)',
   },
-  personaBarLabel: {
+  userAvatarImg: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: GOLD,
+  },
+  dropdownChevron: {
+    color: GOLD,
+    fontSize: 10,
+  },
+  dropdownBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.65)',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    paddingTop: 60,
+    paddingRight: 16,
+  },
+  dropdownMenuBox: {
+    width: 280,
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 12,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+  },
+  dropdownHeader: {
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+    marginBottom: 6,
+  },
+  dropdownHeaderTitle: {
     fontSize: 9,
     fontWeight: '900',
-    color: GOLD,
-  },
-  personaPill: {
-    backgroundColor: '#334155',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-  },
-  personaPillActive: {
-    backgroundColor: GOLD,
-  },
-  personaPillText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#94A3B8',
-  },
-  personaPillTextActive: {
     color: NAVY,
+    letterSpacing: 0.5,
+  },
+  dropdownHeaderSub: {
+    fontSize: 10,
+    color: '#64748B',
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    marginVertical: 2,
+  },
+  dropdownItemActive: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  itemAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+  },
+  itemTextCol: {
+    flex: 1,
+  },
+  itemNameText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: NAVY,
+  },
+  itemRoleText: {
+    fontSize: 10,
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  checkIcon: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#B45309',
+  },
+  dropdownSignOutBtn: {
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+    alignItems: 'center',
+  },
+  dropdownSignOutText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#EF4444',
   },
   scrollContent: {
     backgroundColor: GRAY_BG,
