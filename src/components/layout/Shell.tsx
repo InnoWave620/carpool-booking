@@ -43,12 +43,18 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
   const isFleetAdmin = user.role === 'FLEET_ADMIN' || user.role === 'SUPER_ADMIN';
   const isAdmin = user.role === 'SUPER_ADMIN';
 
-  const navItems: Array<{ href: string; label: string; icon: any; show: boolean; badge?: string }> = [
-    { href: '/employee/dashboard', label: 'Rider Portal', icon: LayoutDashboard, show: true, badge: 'Role' },
-    { href: '/driver/dashboard', label: 'Driver Console', icon: ClipboardList, show: true, badge: 'Role' },
-    { href: '/manager/dashboard', label: 'Manager Hub', icon: CheckSquare, show: true, badge: 'Role' },
-    { href: '/inspector/dashboard', label: 'Inspector Gate', icon: ShieldCheck, show: true, badge: 'Role' },
-    { href: '/admin/dashboard', label: 'Admin & Business Rules', icon: Settings, show: true, badge: 'Admin' },
+  const roleNavItems: Array<{ href: string; label: string; icon: any; show: boolean; badge?: string }> = [
+    { href: '/employee/dashboard', label: 'Rider Portal', icon: LayoutDashboard, show: true, badge: 'Rider' },
+    { href: '/driver/dashboard', label: 'Driver Console', icon: ClipboardList, show: true, badge: 'Driver' },
+    { href: '/manager/dashboard', label: 'Manager Hub', icon: CheckSquare, show: true, badge: 'Manager' },
+    { href: '/inspector/dashboard', label: 'Inspector Gate', icon: ShieldCheck, show: true, badge: 'Inspector' },
+    { href: '/admin/dashboard', label: 'Admin & Rules', icon: Settings, show: true, badge: 'Admin' },
+  ];
+
+  const fleetNavItems: Array<{ href: string; label: string; icon: any; show: boolean; badge?: string }> = [
+    { href: '/bus-schedule', label: 'Bus Schedule', icon: Bus, show: true },
+    { href: '/pool-vehicles', label: 'Pool Vehicles', icon: Car, show: true },
+    { href: '/my-bookings', label: 'My Bookings', icon: Calendar, show: true },
   ];
 
   return (
@@ -61,9 +67,9 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
         <aside className="hidden lg:block w-64 p-4 border-r border-slate-200/80 bg-white min-h-[calc(100vh-4rem)]">
           <div className="space-y-4">
             <div>
-              <p className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Management & Admin</p>
+              <p className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Role Dashboards</p>
               <div className="space-y-1">
-                {navItems.filter(item => item.show && ['/admin', '/approvals', '/inspections'].includes(item.href)).map((item) => {
+                {roleNavItems.map((item) => {
                   const Icon = item.icon;
                   const active = pathname === item.href;
                   return (
@@ -96,7 +102,7 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
             <div>
               <p className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Fleet Dispatch & Schedules</p>
               <div className="space-y-1">
-                {navItems.filter(item => item.show && ['/', '/bus-schedule', '/pool-vehicles', '/driver-console', '/my-bookings'].includes(item.href)).map((item) => {
+                {fleetNavItems.map((item) => {
                   const Icon = item.icon;
                   const active = pathname === item.href;
                   return (
