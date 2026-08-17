@@ -31,7 +31,7 @@ export default function App() {
     avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=200',
   });
 
-  const [activeTab, setActiveTab] = useState<'RIDER' | 'DRIVER' | 'MANAGER' | 'INSPECTOR' | 'ADMIN'>('RIDER');
+  const [activeTab, setActiveTab] = useState<'SHUTTLE' | 'POOL' | 'DRIVER'>('SHUTTLE');
   const [role, setRole] = useState<'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN'>('EMPLOYEE');
 
   // State models
@@ -231,10 +231,9 @@ export default function App() {
               const nextRole = roles[nextIdx];
               setRole(nextRole);
 
-              if (nextRole === 'EMPLOYEE') setActiveTab('RIDER');
+              if (nextRole === 'EMPLOYEE') setActiveTab('SHUTTLE');
+              else if (nextRole === 'MANAGER') setActiveTab('POOL');
               else if (nextRole === 'DRIVER') setActiveTab('DRIVER');
-              else if (nextRole === 'MANAGER') setActiveTab('MANAGER');
-              else if (nextRole === 'FLEET_ADMIN') setActiveTab('INSPECTOR');
             }}
           >
             <Text style={styles.rolePillText}>Role: {role}</Text>
@@ -255,17 +254,17 @@ export default function App() {
       {/* Main Native Screen Content */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
 
-        {/* SCREEN 1: RIDER PORTAL */}
-        {activeTab === 'RIDER' && (
+        {/* SCREEN 1: SHUTTLE BUS BOOKING (Riders & Managers) */}
+        {activeTab === 'SHUTTLE' && (
           <View style={styles.section}>
             {/* Dark Navy Hero Welcome Banner */}
             <View style={styles.heroCard}>
               <View style={styles.heroBadgeRow}>
-                <Text style={styles.heroBadge}>📍 AGL Employee Rider Portal • Walvis Bay</Text>
+                <Text style={styles.heroBadge}>📍 AGL Transport Hub • Walvis Bay Mobile</Text>
               </View>
               <Text style={styles.heroGreeting}>Hello, {activeUser.name.split(' ')[0]}! 👋</Text>
               <Text style={styles.heroSubText}>
-                Reserve shuttle bus seats with visual seat selection and track active trips in real time.
+                Book company shuttle bus seats with visual seat selection and track active trips in real time.
               </Text>
             </View>
 
@@ -379,11 +378,53 @@ export default function App() {
           </View>
         )}
 
-        {/* SCREEN 2: DRIVER CONSOLE */}
+        {/* SCREEN 2: POOL FLEET VEHICLE BOOKING (Managers) */}
+        {activeTab === 'POOL' && (
+          <View style={styles.section}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardBadge}>MANAGER FLEET BOOKING</Text>
+              <Text style={styles.titleText}>Business Trip Pool Vehicles</Text>
+              <Text style={styles.subText}>Reserve pool cars for official business trips outside Walvis Bay</Text>
+            </View>
+
+            {/* Car Card 1 */}
+            <View style={styles.poolCarCard}>
+              <Image 
+                source={{ uri: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600' }} 
+                style={styles.carImage} 
+              />
+              <View style={styles.carInfo}>
+                <Text style={styles.carTitle}>Toyota Hilux Double Cab 4x4</Text>
+                <Text style={styles.carReg}>N 882-102 WB • 5 Seats • Diesel</Text>
+
+                <TouchableOpacity 
+                  style={styles.primaryButton}
+                  onPress={() => setPoolModalVisible(true)}
+                >
+                  <Text style={styles.primaryButtonText}>Book Vehicle for Business Trip</Text>
+                </TouchableOpacity>
+
+                {poolRequested && (
+                  <TouchableOpacity 
+                    style={styles.secondaryButton}
+                    onPress={() => {
+                      setVehicleReturned(true);
+                      Alert.alert('Return Declared', 'Vehicle return declared. Ready for Fleet Admin inspection.');
+                    }}
+                  >
+                    <Text style={styles.secondaryButtonText}>Declare Vehicle Return</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* SCREEN 3: DRIVER CONSOLE (Drivers & Trip Execution) */}
         {activeTab === 'DRIVER' && (
           <View style={styles.section}>
             <View style={styles.driverHeader}>
-              <Text style={styles.driverTitle}>Driver Console</Text>
+              <Text style={styles.driverTitle}>Driver Trip Console</Text>
               <Text style={styles.driverSub}>Driver: Johannes Nangolo • Coaster Bus (N 142-991 WB)</Text>
             </View>
 
@@ -514,153 +555,23 @@ export default function App() {
           </View>
         )}
 
-        {/* SCREEN 3: MANAGER HUB */}
-        {activeTab === 'MANAGER' && (
-          <View style={styles.section}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardBadge}>MANAGER HUB • FLEET & APPROVALS</Text>
-              <Text style={styles.titleText}>Business Trip Pool Vehicles</Text>
-            </View>
-
-            {/* Car Card 1 */}
-            <View style={styles.poolCarCard}>
-              <Image 
-                source={{ uri: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600' }} 
-                style={styles.carImage} 
-              />
-              <View style={styles.carInfo}>
-                <Text style={styles.carTitle}>Toyota Hilux Double Cab 4x4</Text>
-                <Text style={styles.carReg}>N 882-102 WB • 5 Seats • Diesel</Text>
-
-                <TouchableOpacity 
-                  style={styles.primaryButton}
-                  onPress={() => setPoolModalVisible(true)}
-                >
-                  <Text style={styles.primaryButtonText}>Book Vehicle for Business Trip</Text>
-                </TouchableOpacity>
-
-                {poolRequested && (
-                  <TouchableOpacity 
-                    style={styles.secondaryButton}
-                    onPress={() => {
-                      setVehicleReturned(true);
-                      Alert.alert('Return Declared', 'Vehicle return declared. Ready for Fleet Admin inspection.');
-                    }}
-                  >
-                    <Text style={styles.secondaryButtonText}>Declare Vehicle Return</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-
-            {/* Manager Approvals Section */}
-            <View style={[styles.myBookingsCard, { marginTop: 14 }]}>
-              <Text style={styles.cardTitle}>Pending Manager Approvals</Text>
-              <Text style={styles.subText}>Requester: Petrus Haimbodi (Customs & Clearance)</Text>
-              <Text style={styles.subText}>Purpose: Cargo inspection at Port of Walvis Bay</Text>
-              <Text style={styles.subText}>Vehicle: Toyota Hilux (N 882-102 WB)</Text>
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity 
-                  style={styles.approveBtn}
-                  onPress={() => {
-                    setManagerApproved(true);
-                    Alert.alert('Approved!', 'Vehicle reserved and locked in calendar.');
-                  }}
-                >
-                  <Text style={styles.btnText}>Approve & Reserve</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity 
-                  style={styles.rejectBtn}
-                  onPress={() => Alert.alert('Declined', 'Request declined.')}
-                >
-                  <Text style={styles.btnText}>Decline</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* SCREEN 4: INSPECTOR GATE */}
-        {activeTab === 'INSPECTOR' && (
-          <View style={styles.section}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardBadge}>INSPECTOR GATE • VEHICLE RETURN CLEARANCE</Text>
-              <Text style={styles.titleText}>Return Inspection Protocol</Text>
-            </View>
-            
-            <View style={styles.myBookingsCard}>
-              <Text style={styles.cardTitle}>Clearance Protocol • N 882-102 WB</Text>
-              <Text style={styles.subText}>End Odometer: 49,045 KM</Text>
-              <Text style={styles.subText}>Fuel Level: 90%</Text>
-              <Text style={styles.subText}>Inspection Photos: 2 Attached</Text>
-
-              <TouchableOpacity 
-                style={styles.approveBtn}
-                onPress={() => {
-                  setInspectionPassed(true);
-                  Alert.alert('Passed!', 'Vehicle inspection cleared. Car unlocked back to AVAILABLE status.');
-                }}
-              >
-                <Text style={styles.btnText}>Complete Inspection & Release Car</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
-        {/* SCREEN 5: ADMIN & BUSINESS RULES */}
-        {activeTab === 'ADMIN' && (
-          <View style={styles.section}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardBadge}>ADMIN PORTAL • SYSTEM CONTROL</Text>
-              <Text style={styles.titleText}>Business Rules & Transport Config</Text>
-            </View>
-
-            <View style={styles.myBookingsCard}>
-              <Text style={styles.cardTitle}>Live Fleet Rules</Text>
-              <Text style={styles.subText}>• Cutoff Window: 12 Hours Notice</Text>
-              <Text style={styles.subText}>• Auto-Approve Shuttle Bookings: ENABLED</Text>
-              <Text style={styles.subText}>• Max Seats Per Employee: 4 Seats</Text>
-              <Text style={styles.subText}>• Driver Acceptance Timeout: 15 Mins</Text>
-
-              <TouchableOpacity 
-                style={[styles.primaryButton, { marginTop: 12 }]}
-                onPress={() => Alert.alert('Rules Saved', 'Business rules updated across system!')}
-              >
-                <Text style={styles.primaryButtonText}>Save Rule Configurations</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        )}
-
       </ScrollView>
 
-      {/* Mobile Bottom Tab Bar (Expo Go Navigation Bar) */}
+      {/* Mobile Bottom Tab Bar (Native Mobile Navigation) */}
       <View style={styles.tabBar}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('RIDER')}>
-          <Text style={[styles.tabIcon, activeTab === 'RIDER' && styles.tabActive]}>🧑‍💼</Text>
-          <Text style={[styles.tabLabel, activeTab === 'RIDER' && styles.tabActive]}>Rider Portal</Text>
+        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('SHUTTLE')}>
+          <Text style={[styles.tabIcon, activeTab === 'SHUTTLE' && styles.tabActive]}>🚌</Text>
+          <Text style={[styles.tabLabel, activeTab === 'SHUTTLE' && styles.tabActive]}>Shuttle</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('POOL')}>
+          <Text style={[styles.tabIcon, activeTab === 'POOL' && styles.tabActive]}>🚗</Text>
+          <Text style={[styles.tabLabel, activeTab === 'POOL' && styles.tabActive]}>Pool Fleet</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('DRIVER')}>
           <Text style={[styles.tabIcon, activeTab === 'DRIVER' && styles.tabActive]}>📋</Text>
           <Text style={[styles.tabLabel, activeTab === 'DRIVER' && styles.tabActive]}>Driver Console</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('MANAGER')}>
-          <Text style={[styles.tabIcon, activeTab === 'MANAGER' && styles.tabActive]}>👔</Text>
-          <Text style={[styles.tabLabel, activeTab === 'MANAGER' && styles.tabActive]}>Manager Hub</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('INSPECTOR')}>
-          <Text style={[styles.tabIcon, activeTab === 'INSPECTOR' && styles.tabActive]}>🛡️</Text>
-          <Text style={[styles.tabLabel, activeTab === 'INSPECTOR' && styles.tabActive]}>Inspector Gate</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('ADMIN')}>
-          <Text style={[styles.tabIcon, activeTab === 'ADMIN' && styles.tabActive]}>⚙️</Text>
-          <Text style={[styles.tabLabel, activeTab === 'ADMIN' && styles.tabActive]}>Admin & Rules</Text>
         </TouchableOpacity>
       </View>
 
