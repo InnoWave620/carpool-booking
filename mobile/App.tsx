@@ -20,7 +20,7 @@ const TURQUOISE = '#2DD4BF';
 const GRAY_BG = '#F8FAFC';
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [authMode, setAuthMode] = useState<'SIGN_IN' | 'SIGN_UP'>('SIGN_IN');
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
@@ -226,7 +226,13 @@ export default function App() {
             onPress={() => {
               const roles: Array<'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN'> = ['EMPLOYEE', 'DRIVER', 'MANAGER', 'FLEET_ADMIN'];
               const nextIdx = (roles.indexOf(role) + 1) % roles.length;
-              setRole(roles[nextIdx]);
+              const nextRole = roles[nextIdx];
+              setRole(nextRole);
+
+              if (nextRole === 'EMPLOYEE') setActiveTab('BUS');
+              else if (nextRole === 'DRIVER') setActiveTab('DRIVER');
+              else if (nextRole === 'MANAGER') setActiveTab('POOL');
+              else if (nextRole === 'FLEET_ADMIN') setActiveTab('INSPECTION');
             }}
           >
             <Text style={styles.rolePillText}>Role: {role}</Text>
