@@ -347,6 +347,25 @@ export default function App() {
               </Text>
             </View>
 
+            {/* Live Current Trips Banner */}
+            <View style={styles.liveTripsCard}>
+              <View style={styles.liveTripsTitleRow}>
+                <Text style={styles.liveSpinIcon}>⚡</Text>
+                <Text style={styles.liveTripsTitle}>LIVE TRIPS IN PROGRESS</Text>
+              </View>
+
+              <View style={styles.liveTripItem}>
+                <View>
+                  <Text style={styles.liveStatusBadge}>{tripStatus}</Text>
+                  <Text style={styles.liveShuttleName}>Shuttle #N142-991WB</Text>
+                </View>
+                <View style={{ alignItems: 'flex-end' }}>
+                  <Text style={styles.liveDepTime}>Dep: 08:00 AM</Text>
+                  <Text style={styles.liveSeatsLeft}>{availableSeats} Seats Left</Text>
+                </View>
+              </View>
+            </View>
+
             {/* Filter Navigation Pills */}
             <View style={styles.filterPillRow}>
               <TouchableOpacity 
@@ -1029,8 +1048,68 @@ const styles = StyleSheet.create({
     backgroundColor: NAVY,
     borderRadius: 20,
     padding: 18,
-    marginBottom: 4,
+    marginBottom: 10,
     elevation: 4,
+  },
+  liveTripsCard: {
+    backgroundColor: '#FEF3C7',
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+    borderRadius: 16,
+    padding: 12,
+    marginBottom: 14,
+  },
+  liveTripsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 8,
+  },
+  liveSpinIcon: {
+    fontSize: 14,
+    color: '#D97706',
+  },
+  liveTripsTitle: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#92400E',
+    letterSpacing: 0.5,
+  },
+  liveTripItem: {
+    backgroundColor: '#FFF',
+    borderRadius: 12,
+    padding: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+  },
+  liveStatusBadge: {
+    backgroundColor: '#D97706',
+    color: '#FFF',
+    fontSize: 9,
+    fontWeight: '900',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+    marginBottom: 2,
+  },
+  liveShuttleName: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: NAVY,
+  },
+  liveDepTime: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#475569',
+  },
+  liveSeatsLeft: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#059669',
   },
   heroBadgeRow: {
     marginBottom: 8,
