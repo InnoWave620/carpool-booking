@@ -19,8 +19,34 @@ export default function DriverDashboard() {
   const [rejectionReason, setRejectionReason] = useState('');
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
+  const loadData = async () => {
+    try {
+      const [tripsRes, bookingsRes] = await Promise.all([
+        fetch('/api/trips').then(r => r.ok ? r.json() : null),
+        fetch('/api/bookings').then(r => r.ok ? r.json() : null),
+      ]);
+      if (tripsRes && tripsRes.length > 0) {
+        const formatted = tripsRes.map((t: any) => ({
+          ...t,
+          originLocationId: t.originLocationId,
+          destinationLocationId: t.destinationLocationId,
+          departureTime: typeof t.departureTime === 'string' ? t.departureTime : new Date(t.departureTime).toISOString(),
+          arrivalTime: typeof t.arrivalTime === 'string' ? t.arrivalTime : new Date(t.arrivalTime).toISOString(),
+        }));
+        setTrips(formatted);
+        setPendingAssignmentOffer(formatted[0] || null);
+      }
+      if (bookingsRes && bookingsRes.length > 0) {
+        setBookings(bookingsRes);
+      }
+    } catch (e) {
+      console.warn('Using local fallback for driver data');
+    }
+  };
+
   useEffect(() => {
     setUser(getActiveUser());
+    loadData();
   }, []);
 
   if (!user) return null;
@@ -42,11 +68,29 @@ export default function DriverDashboard() {
     setPendingAssignmentOffer(null);
   };
 
-  const handleAdvanceTripState = (tripId: string, nextStatus: any) => {
-    setTrips((prev) =>
-      prev.map((t) => (t.id === tripId ? { ...t, status: nextStatus as any } : t))
-    );
-    setActionMessage(`Trip status successfully updated to ${nextStatus}`);
+  const handleAdvanceTripState = async (tripId: string, nextStatus: any) => {
+    try {
+      const res = await fetch('/api/trips', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId, status: nextStatus }),
+      });
+      if (res.ok) {
+        setTrips((prev) =>
+          prev.map((t) => (t.id === tripId ? { ...t, status: nextStatus as any } : t))
+        );
+        setActionMessage(`Trip status successfully updated to ${nextStatus} in live database!`);
+      } else {
+        setTrips((prev) =>
+          prev.map((t) => (t.id === tripId ? { ...t, status: nextStatus as any } : t))
+        );
+        setActionMessage(`Trip status updated locally to ${nextStatus}`);
+      }
+    } catch (e) {
+      setTrips((prev) =>
+        prev.map((t) => (t.id === tripId ? { ...t, status: nextStatus as any } : t))
+      );
+    }
   };
 
   const togglePassengerCheckIn = (bookingId: string) => {

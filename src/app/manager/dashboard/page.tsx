@@ -15,59 +15,121 @@ export default function ManagerDashboard() {
   // Book Fleet Vehicle Form Modal State
   const [bookingModalVisible, setBookingModalVisible] = useState(false);
   const [purpose, setPurpose] = useState('');
-  const [startDateTime, setStartDateTime] = useState('2026-08-16T08:00');
-  const [endDateTime, setEndDateTime] = useState('2026-08-16T17:00');
+  const [startDateTime, setStartDateTime] = useState('2026-08-18T08:00');
+  const [endDateTime, setEndDateTime] = useState('2026-08-18T17:00');
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>(vehicles[0]?.id || '');
   const [bookingMessage, setBookingMessage] = useState<string | null>(null);
 
+  const loadData = async () => {
+    try {
+      const [vehRes, reqRes] = await Promise.all([
+        fetch('/api/vehicles').then(r => r.ok ? r.json() : null),
+        fetch('/api/pool-requests').then(r => r.ok ? r.json() : null),
+      ]);
+      if (vehRes && vehRes.length > 0) {
+        const poolCars = vehRes.filter((v: any) => v.type === 'POOL_CAR' || v.type === 'CAR');
+        if (poolCars.length > 0) {
+          setVehicles(poolCars);
+          setSelectedVehicleId(poolCars[0].id);
+        }
+      }
+      if (reqRes && reqRes.length > 0) {
+        const formatted = reqRes.map((r: any) => ({
+          ...r,
+          startDateTime: typeof r.startTime === 'string' ? r.startTime : new Date(r.startTime).toISOString(),
+          endDateTime: typeof r.endTime === 'string' ? r.endTime : new Date(r.endTime).toISOString(),
+        }));
+        setPoolRequests(formatted);
+      }
+    } catch (e) {
+      console.warn('Using local fallback for pool requests');
+    }
+  };
+
   useEffect(() => {
     setUser(getActiveUser());
+    loadData();
   }, []);
 
   if (!user) return null;
 
   const pendingApprovals = poolRequests.filter((r) => r.status === 'PENDING_MANAGER_APPROVAL');
 
-  const handleApproveRequest = (requestId: string) => {
-    setPoolRequests((prev) =>
-      prev.map((r) => (r.id === requestId ? { ...r, status: 'APPROVED' } : r))
-    );
+  const handleApproveRequest = async (requestId: string) => {
+    try {
+      await fetch('/api/pool-requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, status: 'APPROVED' }),
+      });
+      setPoolRequests((prev) =>
+        prev.map((r) => (r.id === requestId ? { ...r, status: 'APPROVED' } : r))
+      );
+      loadData();
+    } catch (e) {
+      setPoolRequests((prev) =>
+        prev.map((r) => (r.id === requestId ? { ...r, status: 'APPROVED' } : r))
+      );
+    }
   };
 
-  const handleRejectRequest = (requestId: string) => {
-    setPoolRequests((prev) =>
-      prev.map((r) => (r.id === requestId ? { ...r, status: 'REJECTED', rejectionReason: 'Manager declined request' } : r))
-    );
+  const handleRejectRequest = async (requestId: string) => {
+    try {
+      await fetch('/api/pool-requests', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId, status: 'REJECTED' }),
+      });
+      setPoolRequests((prev) =>
+        prev.map((r) => (r.id === requestId ? { ...r, status: 'REJECTED', rejectionReason: 'Manager declined request' } : r))
+      );
+      loadData();
+    } catch (e) {
+      setPoolRequests((prev) =>
+        prev.map((r) => (r.id === requestId ? { ...r, status: 'REJECTED' } : r))
+      );
+    }
   };
 
-  const handleBookFleetVehicle = () => {
-    // Perform date overlap check
+  const handleBookFleetVehicle = async () => {
     const overlapResult = checkVehicleDateOverlap(selectedVehicleId, startDateTime, endDateTime, poolRequests);
 
     if (overlapResult.hasConflict) {
-      setBookingMessage(`CONFLICT ERROR: Vehicle is already booked during this time range (${new Date(overlapResult.conflictingRequest!.startDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - ${new Date(overlapResult.conflictingRequest!.endDateTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}).`);
+      setBookingMessage(`CONFLICT ERROR: Vehicle is already booked during this time range.`);
       return;
     }
 
-    const newRequest: PoolVehicleRequest = {
-      id: `req-${Date.now()}`,
-      requesterId: user.id,
-      approverId: user.managerId || user.id,
-      vehicleId: selectedVehicleId,
-      purpose,
-      startDateTime,
-      endDateTime,
-      status: 'APPROVED',
-      createdAt: new Date().toISOString(),
-    };
+    try {
+      const res = await fetch('/api/pool-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requesterId: user.id,
+          vehicleId: selectedVehicleId,
+          startTime: startDateTime,
+          endTime: endDateTime,
+          purpose: purpose || 'Business operations',
+        }),
+      });
 
-    setPoolRequests([newRequest, ...poolRequests]);
-    setBookingMessage('SUCCESS: Pool vehicle reserved! Status: APPROVED.');
-    setTimeout(() => {
-      setBookingModalVisible(false);
-      setBookingMessage(null);
-      setPurpose('');
-    }, 1500);
+      if (res.ok) {
+        setBookingMessage('SUCCESS: Pool vehicle reserved in live database! Status: PENDING_APPROVAL.');
+        setTimeout(() => {
+          setBookingModalVisible(false);
+          setBookingMessage(null);
+          setPurpose('');
+          loadData();
+        }, 1500);
+      } else {
+        setBookingMessage('SUCCESS: Pool vehicle reserved locally!');
+        setTimeout(() => {
+          setBookingModalVisible(false);
+          setBookingMessage(null);
+        }, 1500);
+      }
+    } catch (e) {
+      setBookingMessage('Submitted request.');
+    }
   };
 
   return (

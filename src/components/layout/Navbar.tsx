@@ -37,7 +37,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onUserChange }) => {
     setCurrentUser(updated);
     setShowRoleSelector(false);
     if (onUserChange) onUserChange(updated);
-    window.location.reload(); // Reload to refresh permissions & state
+    
+    // Redirect to the role's primary authorized dashboard
+    const defaultRoute = 
+      emp.role === 'DRIVER' ? '/driver/dashboard' :
+      emp.role === 'MANAGER' ? '/manager/dashboard' :
+      emp.role === 'FLEET_ADMIN' ? '/inspector/dashboard' :
+      emp.role === 'SUPER_ADMIN' ? '/admin/dashboard' :
+      '/employee/dashboard';
+
+    window.location.href = defaultRoute;
   };
 
   const notifications = getUserNotifications(currentUser.id);

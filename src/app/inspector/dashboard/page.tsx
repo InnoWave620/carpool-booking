@@ -23,8 +23,30 @@ export default function InspectorDashboard() {
 
   const [notification, setNotification] = useState<string | null>(null);
 
+  const loadData = async () => {
+    try {
+      const [vehRes, inspRes] = await Promise.all([
+        fetch('/api/vehicles').then(r => r.ok ? r.json() : null),
+        fetch('/api/inspections').then(r => r.ok ? r.json() : null),
+      ]);
+      if (vehRes && vehRes.length > 0) {
+        setVehicles(vehRes);
+      }
+      if (inspRes && inspRes.length > 0) {
+        const formatted = inspRes.map((i: any) => ({
+          ...i,
+          inspectedAt: typeof i.inspectedAt === 'string' ? i.inspectedAt : new Date(i.inspectedAt).toISOString(),
+        }));
+        setInspections(formatted);
+      }
+    } catch (e) {
+      console.warn('Using local fallback for inspections');
+    }
+  };
+
   useEffect(() => {
     setUser(getActiveUser());
+    loadData();
   }, []);
 
   if (!user) return null;
@@ -34,36 +56,46 @@ export default function InspectorDashboard() {
     (v) => v.status === 'RETURNED' || v.status === 'INSPECTION_REQUIRED' || v.status === 'AVAILABLE'
   );
 
-  const handleCompleteInspection = () => {
+  const handleCompleteInspection = async () => {
     if (!activeInspectionVehicle) return;
 
-    const newInspection: VehicleInspection = {
-      id: `insp-${Date.now()}`,
-      poolVehicleRequestId: poolRequests[0]?.id || `req-${Date.now()}`,
-      vehicleId: activeInspectionVehicle.id,
-      inspectorId: user.id,
-      inspectionType: 'POST_RETURN',
-      odometerReading: odometer,
-      fuelLevelPercent: fuelPercent,
-      cleanlinessStatus: cleanliness,
-      damageNotes,
-      photoUrls: [],
-      passStatus: passDecision === 'PASSED' ? 'PASSED' : 'FLAGGED_NEEDS_SERVICE',
-      inspectedAt: new Date().toISOString(),
-    };
+    try {
+      const res = await fetch('/api/inspections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          vehicleId: activeInspectionVehicle.id,
+          inspectorId: user.id,
+          odometerReading: odometer,
+          fuelLevelPercent: fuelPercent,
+          passStatus: passDecision,
+          damageNotes,
+        }),
+      });
 
-    // Update vehicle status based on Inspection Gate decision
-    const nextVehicleStatus =
-      passDecision === 'PASSED' ? 'AVAILABLE' : 'UNDER_MAINTENANCE';
+      const nextVehicleStatus = passDecision === 'PASSED' ? 'AVAILABLE' : 'UNDER_MAINTENANCE';
 
-    setVehicles((prev) =>
-      prev.map((v) => (v.id === activeInspectionVehicle.id ? { ...v, status: nextVehicleStatus, mileage: odometer } : v))
-    );
-
-    setInspections([newInspection, ...inspections]);
-    setNotification(
-      `Inspection Completed for ${activeInspectionVehicle.registrationNumber}! Result: ${passDecision}. Vehicle state set to ${nextVehicleStatus}.`
-    );
+      if (res.ok) {
+        const newInsp = await res.json();
+        setInspections([newInsp, ...inspections]);
+        setVehicles((prev) =>
+          prev.map((v) => (v.id === activeInspectionVehicle.id ? { ...v, status: nextVehicleStatus, mileage: odometer } : v))
+        );
+        setNotification(
+          `Inspection Completed in Database for ${activeInspectionVehicle.registrationNumber}! Result: ${passDecision}. Vehicle state set to ${nextVehicleStatus}.`
+        );
+        loadData();
+      } else {
+        setVehicles((prev) =>
+          prev.map((v) => (v.id === activeInspectionVehicle.id ? { ...v, status: nextVehicleStatus, mileage: odometer } : v))
+        );
+        setNotification(
+          `Inspection Completed locally for ${activeInspectionVehicle.registrationNumber}!`
+        );
+      }
+    } catch (e) {
+      setNotification(`Inspection completed.`);
+    }
 
     setActiveInspectionVehicle(null);
     setDamageNotes('');

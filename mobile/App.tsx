@@ -32,8 +32,18 @@ export default function App() {
   });
 
   const [activeTab, setActiveTab] = useState<'RIDER' | 'DRIVER' | 'MANAGER' | 'INSPECTOR' | 'ADMIN'>('RIDER');
-  const [role, setRole] = useState<'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN'>('EMPLOYEE');
+  const [role, setRole] = useState<'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN' | 'SUPER_ADMIN'>('EMPLOYEE');
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Strict Role Permissions
+  const isTabAllowed = (tab: 'RIDER' | 'DRIVER' | 'MANAGER' | 'INSPECTOR' | 'ADMIN') => {
+    if (role === 'SUPER_ADMIN') return true;
+    if (role === 'DRIVER') return tab === 'DRIVER';
+    if (role === 'MANAGER') return tab === 'MANAGER' || tab === 'RIDER';
+    if (role === 'FLEET_ADMIN') return tab === 'INSPECTOR' || tab === 'RIDER';
+    if (role === 'EMPLOYEE') return tab === 'RIDER';
+    return tab === 'RIDER';
+  };
 
   // State models
   const [availableSeats, setAvailableSeats] = useState(16);
@@ -59,19 +69,49 @@ export default function App() {
   const [poolPurpose, setPoolPurpose] = useState('');
   const [poolStartDateTime, setPoolStartDateTime] = useState('2026-08-18 08:00');
   const [poolEndDateTime, setPoolEndDateTime] = useState('2026-08-18 17:00');
+  const [approval1Done, setApproval1Done] = useState<'none' | 'approved' | 'rejected'>('none');
+
+  // Inspector Gate State — Vehicle Queue & Inspection Modal
+  const [activeInspectVehicle, setActiveInspectVehicle] = useState<string | null>(null);
+  const [inspOdometer, setInspOdometer] = useState('49045');
+  const [inspFuel, setInspFuel] = useState('85');
+  const [inspNotes, setInspNotes] = useState('');
+  const [inspDecision, setInspDecision] = useState<'PASSED' | 'FAILED' | 'REQUIRES_ATTENTION'>('PASSED');
+  const [completedInspections, setCompletedInspections] = useState<Array<{ id: string; vehicle: string; reg: string; odometer: string; fuel: string; result: string }>>([]);
+
+  // Admin Business Rules Editable State
+  const [ruleCutoffHours, setRuleCutoffHours] = useState('12');
+  const [ruleAutoApprove, setRuleAutoApprove] = useState(true);
+  const [ruleMaxSeats, setRuleMaxSeats] = useState('4');
+  const [ruleDriverTimeout, setRuleDriverTimeout] = useState('15');
+  const [ruleBookingWindow, setRuleBookingWindow] = useState('7');
+  const [ruleInspectorThreshold, setRuleInspectorThreshold] = useState('500');
 
   const handleMobileLogin = (empName?: string, empEmail?: string, empRole?: string, empAvatar?: string) => {
+    const targetRole = (empRole || 'EMPLOYEE') as 'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN' | 'SUPER_ADMIN';
     setActiveUser({
       name: empName || 'Petrus Haimbodi',
       email: empEmail || (emailInput || 'petrus.haimbodi@aglgroup.com'),
-      role: empRole || 'EMPLOYEE',
+      role: targetRole,
       avatar: empAvatar || 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=200',
     });
-    if (empRole) {
-      setRole(empRole as any);
+    setRole(targetRole);
+
+    // Route only to the authorized role's primary screen
+    if (targetRole === 'DRIVER') {
+      setActiveTab('DRIVER');
+    } else if (targetRole === 'MANAGER') {
+      setActiveTab('MANAGER');
+    } else if (targetRole === 'FLEET_ADMIN') {
+      setActiveTab('INSPECTOR');
+    } else if (targetRole === 'SUPER_ADMIN') {
+      setActiveTab('ADMIN');
+    } else {
+      setActiveTab('RIDER');
     }
+
     setIsAuthenticated(true);
-    Alert.alert('Signed In', `Welcome back, ${empName || 'Petrus'}! Signed in via Microsoft Entra ID.`);
+    Alert.alert('Signed In', `Signed in as ${empName || 'Petrus'} (${targetRole.replace('_', ' ')}).`);
   };
 
   const handleBookShuttle = (time: string = '08:00 AM') => {
@@ -177,25 +217,31 @@ export default function App() {
             <View style={styles.personaGrid}>
               <TouchableOpacity 
                 style={styles.personaChip}
-                onPress={() => handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE')}
+                onPress={() => handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE', 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=200')}
               >
                 <Text style={styles.personaChipText}>🧑‍💼 Petrus (Rider)</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.personaChip}
-                onPress={() => handleMobileLogin('Klaus Schneider', 'manager.logistics@aglgroup.com', 'MANAGER')}
+                onPress={() => handleMobileLogin('Klaus Schneider', 'manager.logistics@aglgroup.com', 'MANAGER', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200')}
               >
                 <Text style={styles.personaChipText}>👔 Klaus (Manager)</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.personaChip}
-                onPress={() => handleMobileLogin('Johannes Nangolo', 'driver.bus1@aglgroup.com', 'DRIVER')}
+                onPress={() => handleMobileLogin('Johannes Nangolo', 'driver.bus1@aglgroup.com', 'DRIVER', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200')}
               >
                 <Text style={styles.personaChipText}>🚌 Johannes (Driver)</Text>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.personaChip}
-                onPress={() => handleMobileLogin('Senzo Shinga', 'admin.namibia@aglgroup.com', 'SUPER_ADMIN')}
+                onPress={() => handleMobileLogin('Maria Amadhila', 'fleet.admin@aglgroup.com', 'FLEET_ADMIN', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200')}
+              >
+                <Text style={styles.personaChipText}>🛡️ Maria (Inspector)</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.personaChip}
+                onPress={() => handleMobileLogin('Senzo Shinga', 'admin.namibia@aglgroup.com', 'SUPER_ADMIN', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200')}
               >
                 <Text style={styles.personaChipText}>⚙️ Senzo (Admin)</Text>
               </TouchableOpacity>
@@ -250,9 +296,9 @@ export default function App() {
 
             {/* Persona 1: Rider (Petrus) */}
             <TouchableOpacity 
-              style={[styles.dropdownItem, role === 'EMPLOYEE' && styles.dropdownItemActive]}
+              style={[styles.dropdownItem, activeUser.name === 'Petrus Haimbodi' && styles.dropdownItemActive]}
               onPress={() => {
-                handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE');
+                handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE', 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=200');
                 setActiveTab('RIDER');
                 setShowDropdown(false);
               }}
@@ -262,14 +308,14 @@ export default function App() {
                 <Text style={styles.itemNameText}>Petrus Haimbodi</Text>
                 <Text style={styles.itemRoleText}>EMPLOYEE • Rider</Text>
               </View>
-              {role === 'EMPLOYEE' && <Text style={styles.checkIcon}>✓</Text>}
+              {activeUser.name === 'Petrus Haimbodi' && <Text style={styles.checkIcon}>✓</Text>}
             </TouchableOpacity>
 
             {/* Persona 2: Manager (Klaus) */}
             <TouchableOpacity 
-              style={[styles.dropdownItem, role === 'MANAGER' && styles.dropdownItemActive]}
+              style={[styles.dropdownItem, activeUser.name === 'Klaus Schneider' && styles.dropdownItemActive]}
               onPress={() => {
-                handleMobileLogin('Klaus Schneider', 'manager.logistics@aglgroup.com', 'MANAGER');
+                handleMobileLogin('Klaus Schneider', 'manager.logistics@aglgroup.com', 'MANAGER', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200');
                 setActiveTab('MANAGER');
                 setShowDropdown(false);
               }}
@@ -279,14 +325,14 @@ export default function App() {
                 <Text style={styles.itemNameText}>Klaus Schneider</Text>
                 <Text style={styles.itemRoleText}>MANAGER • Logistics Lead</Text>
               </View>
-              {role === 'MANAGER' && <Text style={styles.checkIcon}>✓</Text>}
+              {activeUser.name === 'Klaus Schneider' && <Text style={styles.checkIcon}>✓</Text>}
             </TouchableOpacity>
 
             {/* Persona 3: Driver (Johannes) */}
             <TouchableOpacity 
-              style={[styles.dropdownItem, role === 'DRIVER' && styles.dropdownItemActive]}
+              style={[styles.dropdownItem, activeUser.name === 'Johannes Nangolo' && styles.dropdownItemActive]}
               onPress={() => {
-                handleMobileLogin('Johannes Nangolo', 'driver.bus1@aglgroup.com', 'DRIVER');
+                handleMobileLogin('Johannes Nangolo', 'driver.bus1@aglgroup.com', 'DRIVER', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200');
                 setActiveTab('DRIVER');
                 setShowDropdown(false);
               }}
@@ -296,24 +342,41 @@ export default function App() {
                 <Text style={styles.itemNameText}>Johannes Nangolo</Text>
                 <Text style={styles.itemRoleText}>DRIVER • Shuttle Bus 01</Text>
               </View>
-              {role === 'DRIVER' && <Text style={styles.checkIcon}>✓</Text>}
+              {activeUser.name === 'Johannes Nangolo' && <Text style={styles.checkIcon}>✓</Text>}
             </TouchableOpacity>
 
-            {/* Persona 4: Admin (Senzo) */}
+            {/* Persona 4: Inspector (Maria) */}
             <TouchableOpacity 
-              style={[styles.dropdownItem, role === 'FLEET_ADMIN' && styles.dropdownItemActive]}
+              style={[styles.dropdownItem, activeUser.name === 'Maria Amadhila' && styles.dropdownItemActive]}
               onPress={() => {
-                handleMobileLogin('Senzo Shinga', 'admin.namibia@aglgroup.com', 'SUPER_ADMIN');
+                handleMobileLogin('Maria Amadhila', 'fleet.admin@aglgroup.com', 'FLEET_ADMIN', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200');
+                setActiveTab('INSPECTOR');
+                setShowDropdown(false);
+              }}
+            >
+              <Image source={{ uri: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200' }} style={styles.itemAvatar} />
+              <View style={styles.itemTextCol}>
+                <Text style={styles.itemNameText}>Maria Amadhila</Text>
+                <Text style={styles.itemRoleText}>FLEET ADMIN • Inspector</Text>
+              </View>
+              {activeUser.name === 'Maria Amadhila' && <Text style={styles.checkIcon}>✓</Text>}
+            </TouchableOpacity>
+
+            {/* Persona 5: Admin (Senzo) */}
+            <TouchableOpacity 
+              style={[styles.dropdownItem, activeUser.name === 'Senzo Shinga' && styles.dropdownItemActive]}
+              onPress={() => {
+                handleMobileLogin('Senzo Shinga', 'admin.namibia@aglgroup.com', 'SUPER_ADMIN', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200');
                 setActiveTab('ADMIN');
                 setShowDropdown(false);
               }}
             >
-              <Image source={{ uri: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=200' }} style={styles.itemAvatar} />
+              <Image source={{ uri: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200' }} style={styles.itemAvatar} />
               <View style={styles.itemTextCol}>
                 <Text style={styles.itemNameText}>Senzo Shinga</Text>
                 <Text style={styles.itemRoleText}>SUPER ADMIN • Operations</Text>
               </View>
-              {role === 'FLEET_ADMIN' && <Text style={styles.checkIcon}>✓</Text>}
+              {activeUser.name === 'Senzo Shinga' && <Text style={styles.checkIcon}>✓</Text>}
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -466,11 +529,27 @@ export default function App() {
 
             {/* ALL TRIPS LIST */}
             {riderFilter === 'ALL' && (
-              <View style={styles.myBookingsCard}>
-                <Text style={styles.cardTitle}>All Scheduled Shuttles today</Text>
-                <Text style={styles.subText}>• 08:00 AM Departure • Coaster N 142-991 WB (16 Seats left)</Text>
-                <Text style={styles.subText}>• 09:00 AM Departure • Coaster N 882-104 WB (20 Seats left)</Text>
-                <Text style={styles.subText}>• 17:00 PM Departure • Coaster N 142-991 WB (22 Seats left)</Text>
+              <View style={{ gap: 12 }}>
+                {[
+                  { time: '08:00', route: 'AGL HQ ➔ WMT Container Terminal', seats: availableSeats, total: 22, status: tripStatus },
+                  { time: '09:00', route: 'WMT Container Terminal ➔ AGL HQ', seats: 20, total: 22, status: 'SCHEDULED' },
+                  { time: '10:00', route: 'AGL HQ ➔ Namibia Customs & Excise Office', seats: 18, total: 22, status: 'SCHEDULED' },
+                  { time: '11:00', route: 'Namibia Customs Office ➔ AGL HQ', seats: 22, total: 22, status: 'SCHEDULED' },
+                  { time: 'Tomorrow 08:00', route: 'AGL HQ ➔ WMT Container Terminal', seats: 14, total: 22, status: 'SCHEDULED' },
+                ].map((trip, i) => (
+                  <View key={i} style={styles.scheduleCard}>
+                    <View style={styles.scheduleHeaderRow}>
+                      <Text style={styles.scheduledPill}>{trip.status}</Text>
+                      <Text style={styles.noticeWindowText}>Toyota Coaster • N 142-991 WB</Text>
+                    </View>
+                    <Text style={styles.scheduleTimeTitle}>{trip.time} Departure</Text>
+                    <Text style={styles.scheduleRouteSub}>{trip.route}</Text>
+                    <View style={styles.seatsRow}>
+                      <Text style={styles.seatsLabel}>Seats Remaining:</Text>
+                      <Text style={styles.seatsValue}>{trip.seats} / {trip.total}</Text>
+                    </View>
+                  </View>
+                ))}
               </View>
             )}
           </View>
@@ -479,25 +558,42 @@ export default function App() {
         {/* SCREEN 2: DRIVER CONSOLE */}
         {activeTab === 'DRIVER' && (
           <View style={styles.section}>
-            <View style={styles.driverHeader}>
-              <Text style={styles.driverTitle}>Driver Console</Text>
-              <Text style={styles.driverSub}>Driver: Johannes Nangolo • Coaster Bus (N 142-991 WB)</Text>
+            {/* Header Banner */}
+            <View style={styles.driverHeroBanner}>
+              <Text style={styles.driverHeroBadge}>DRIVER COMMAND CONSOLE • AGL FLEET</Text>
+              <Text style={styles.driverTitle}>Driver Console: Johannes Nangolo</Text>
+              <Text style={styles.driverSub}>Assigned Bus: Toyota Coaster Executive Bus (N 142-991 WB)</Text>
             </View>
 
             {/* Trip Assignment Offer Banner */}
             {hasTripAssignmentOffer && (
               <View style={styles.offerCard}>
                 <View style={styles.offerHeaderRow}>
-                  <Text style={styles.offerBadge}>NEW TRIP OFFER</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <View style={styles.pulseDot} />
+                    <Text style={styles.offerBadge}>NEW TRIP ASSIGNMENT OFFERED</Text>
+                  </View>
                   <Text style={styles.offerTime}>Attempt #1</Text>
                 </View>
 
-                <Text style={styles.offerRoute}>08:00 AM • AGL HQ ➔ WMT Port</Text>
-                <Text style={styles.offerSub}>Vehicle: Coaster Bus (N 142-991 WB)</Text>
+                <View style={styles.offerDetailsGrid}>
+                  <View>
+                    <Text style={styles.offerDetailLabel}>ROUTE</Text>
+                    <Text style={styles.offerRoute}>AGL HQ ➔ WMT Port</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.offerDetailLabel}>DEPARTURE TIME</Text>
+                    <Text style={styles.offerRoute}>08:00</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.offerDetailLabel}>ASSIGNED BUS</Text>
+                    <Text style={styles.offerRoute}>N 142-991 WB</Text>
+                  </View>
+                </View>
 
                 <View style={styles.buttonRow}>
                   <TouchableOpacity 
-                    style={styles.approveBtn}
+                    style={[styles.approveBtn, { flex: 1 }]}
                     onPress={() => {
                       setHasTripAssignmentOffer(false);
                       Alert.alert('Assignment Accepted', 'Trip confirmed! Ready for boarding.');
@@ -519,94 +615,131 @@ export default function App() {
               </View>
             )}
 
-            {/* Active Trip Status & Controlled Action Buttons */}
+            {/* Active Trips & Controlled State Action Controls */}
+            <Text style={styles.tripsListTitle}>Active Trips & Controlled State Action Controls</Text>
+
+            {/* Trip 1 */}
             <View style={styles.tripControlCard}>
               <View style={styles.tripStatusHeader}>
-                <Text style={styles.cardTitle}>Current Active Trip</Text>
                 <Text style={styles.statusPill}>{tripStatus}</Text>
+                <Text style={styles.tripTimeBadge}>08:00 Departure</Text>
               </View>
-
-              <Text style={styles.tripRouteText}>08:00 AM • AGL HQ ➔ Walvis Bay Container Terminal</Text>
+              <Text style={styles.tripRouteText}>AGL HQ ➔ Walvis Bay Container Terminal</Text>
 
               <View style={styles.actionButtonContainer}>
                 {tripStatus === 'SCHEDULED' && (
-                  <TouchableOpacity 
-                    style={[styles.primaryButton, { backgroundColor: '#F59E0B' }]}
-                    onPress={() => setTripStatus('BOARDING')}
-                  >
+                  <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#F59E0B' }]} onPress={() => setTripStatus('BOARDING')}>
                     <Text style={styles.primaryButtonText}>START BOARDING 🚌</Text>
                   </TouchableOpacity>
                 )}
-
                 {tripStatus === 'BOARDING' && (
-                  <TouchableOpacity 
-                    style={[styles.primaryButton, { backgroundColor: '#0D9488' }]}
-                    onPress={() => setTripStatus('EN_ROUTE')}
-                  >
+                  <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#0D9488' }]} onPress={() => setTripStatus('EN_ROUTE')}>
                     <Text style={styles.primaryButtonText}>DEPART / START TRIP 🟢</Text>
                   </TouchableOpacity>
                 )}
-
                 {tripStatus === 'EN_ROUTE' && (
-                  <TouchableOpacity 
-                    style={[styles.primaryButton, { backgroundColor: '#4F46E5' }]}
-                    onPress={() => setTripStatus('ARRIVED')}
-                  >
+                  <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#4F46E5' }]} onPress={() => setTripStatus('ARRIVED')}>
                     <Text style={styles.primaryButtonText}>ARRIVED AT DESTINATION 📍</Text>
                   </TouchableOpacity>
                 )}
-
                 {tripStatus === 'ARRIVED' && (
-                  <TouchableOpacity 
-                    style={[styles.primaryButton, { backgroundColor: '#9333EA' }]}
-                    onPress={() => setTripStatus('EMPTYING')}
-                  >
+                  <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#9333EA' }]} onPress={() => setTripStatus('EMPTYING')}>
                     <Text style={styles.primaryButtonText}>EMPTY BUS / PASSENGERS DEPARKED 🚪</Text>
                   </TouchableOpacity>
                 )}
-
                 {tripStatus === 'EMPTYING' && (
-                  <TouchableOpacity 
-                    style={[styles.primaryButton, { backgroundColor: '#059669' }]}
-                    onPress={() => setTripStatus('COMPLETED')}
-                  >
+                  <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#059669' }]} onPress={() => setTripStatus('COMPLETED')}>
                     <Text style={styles.primaryButtonText}>COMPLETE TRIP & LOG REPORT ✅</Text>
                   </TouchableOpacity>
                 )}
-
                 {tripStatus === 'COMPLETED' && (
                   <Text style={styles.completedTripText}>✅ Trip Completed & Logged</Text>
                 )}
               </View>
+
+              {/* Passenger Manifest */}
+              <View style={styles.manifestCard}>
+                <Text style={styles.manifestTitle}>DIGITAL PASSENGER MANIFEST CHECK-IN (2 BOOKINGS)</Text>
+                {[
+                  { name: 'Petrus Haimbodi', dept: 'Customs & Clearance', seat: 'Seat 01' },
+                  { name: 'Selma Shikongo', dept: 'Logistics Ops', seat: 'Seat 03' },
+                ].map((p, i) => {
+                  const isChecked = checkedPassengers[p.name];
+                  return (
+                    <View key={i} style={styles.manifestItem}>
+                      <TouchableOpacity
+                        style={[styles.checkbox, isChecked && styles.checkboxActive]}
+                        onPress={() => setCheckedPassengers(prev => ({ ...prev, [p.name]: !prev[p.name] }))}
+                      >
+                        <Text style={styles.checkboxCheck}>{isChecked ? '✓' : ''}</Text>
+                      </TouchableOpacity>
+                      <View style={styles.passengerInfo}>
+                        <Text style={styles.passengerName}>{p.name}</Text>
+                        <Text style={styles.passengerDept}>{p.dept} • {p.seat}</Text>
+                      </View>
+                      <Text style={styles.boardingStatus}>{isChecked ? 'ON BOARD' : 'WAITING'}</Text>
+                    </View>
+                  );
+                })}
+              </View>
             </View>
 
-            {/* Passenger Boarding Manifest Checklist */}
-            <View style={styles.manifestCard}>
-              <Text style={styles.cardTitle}>Confirmed Passenger Manifest</Text>
-              
-              {[
-                { name: 'Petrus Haimbodi', dept: 'Customs & Clearance', seat: 'Seat 01' },
-                { name: 'Selma Shikongo', dept: 'Logistics Ops', seat: 'Seat 03' }
-              ].map((p, i) => {
-                const isChecked = checkedPassengers[p.name];
-                return (
-                  <View key={i} style={styles.manifestItem}>
-                    <TouchableOpacity 
-                      style={[styles.checkbox, isChecked && styles.checkboxActive]}
-                      onPress={() => setCheckedPassengers(prev => ({ ...prev, [p.name]: !prev[p.name] }))}
-                    >
-                      <Text style={styles.checkboxCheck}>{isChecked ? '✓' : ''}</Text>
-                    </TouchableOpacity>
+            {/* Trip 2 */}
+            <View style={styles.tripControlCard}>
+              <View style={styles.tripStatusHeader}>
+                <Text style={styles.statusPill}>SCHEDULED</Text>
+                <Text style={styles.tripTimeBadge}>09:00 Departure</Text>
+              </View>
+              <Text style={styles.tripRouteText}>WMT Container Terminal ➔ AGL HQ</Text>
+              <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#F59E0B', marginTop: 10 }]} onPress={() => Alert.alert('Trip Started', 'Trip 2 boarding started.')}>
+                <Text style={styles.primaryButtonText}>START BOARDING 🚌</Text>
+              </TouchableOpacity>
+              <View style={[styles.manifestCard, { marginTop: 10 }]}>
+                <Text style={styles.manifestTitle}>DIGITAL PASSENGER MANIFEST CHECK-IN (0 BOOKINGS)</Text>
+                <Text style={styles.emptyText}>No confirmed passengers on this trip yet.</Text>
+              </View>
+            </View>
 
-                    <View style={styles.passengerInfo}>
-                      <Text style={styles.passengerName}>{p.name}</Text>
-                      <Text style={styles.passengerDept}>{p.dept} • {p.seat}</Text>
-                    </View>
+            {/* Trip 3 */}
+            <View style={styles.tripControlCard}>
+              <View style={styles.tripStatusHeader}>
+                <Text style={styles.statusPill}>SCHEDULED</Text>
+                <Text style={styles.tripTimeBadge}>10:00 Departure</Text>
+              </View>
+              <Text style={styles.tripRouteText}>AGL HQ ➔ Namibia Customs & Excise Office</Text>
+              <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#F59E0B', marginTop: 10 }]} onPress={() => Alert.alert('Trip Started', 'Trip 3 boarding started.')}>
+                <Text style={styles.primaryButtonText}>START BOARDING 🚌</Text>
+              </TouchableOpacity>
+              <View style={[styles.manifestCard, { marginTop: 10 }]}>
+                <Text style={styles.manifestTitle}>DIGITAL PASSENGER MANIFEST CHECK-IN (0 BOOKINGS)</Text>
+                <Text style={styles.emptyText}>No confirmed passengers on this trip yet.</Text>
+              </View>
+            </View>
 
-                    <Text style={styles.boardingStatus}>{isChecked ? 'ON BOARD' : 'WAITING'}</Text>
-                  </View>
-                );
-              })}
+            {/* Trip 4 */}
+            <View style={styles.tripControlCard}>
+              <View style={styles.tripStatusHeader}>
+                <Text style={styles.statusPill}>SCHEDULED</Text>
+                <Text style={styles.tripTimeBadge}>11:00 Departure</Text>
+              </View>
+              <Text style={styles.tripRouteText}>Namibia Customs Office ➔ AGL HQ</Text>
+              <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#F59E0B', marginTop: 10 }]} onPress={() => Alert.alert('Trip Started', 'Trip 4 boarding started.')}>
+                <Text style={styles.primaryButtonText}>START BOARDING 🚌</Text>
+              </TouchableOpacity>
+              <View style={[styles.manifestCard, { marginTop: 10 }]}>
+                <Text style={styles.manifestTitle}>DIGITAL PASSENGER MANIFEST CHECK-IN (0 BOOKINGS)</Text>
+                <Text style={styles.emptyText}>No confirmed passengers on this trip yet.</Text>
+              </View>
+            </View>
+
+            {/* Trip 5 (Tomorrow) */}
+            <View style={styles.tripControlCard}>
+              <View style={styles.tripStatusHeader}>
+                <Text style={[styles.statusPill, { backgroundColor: '#CBD5E1', color: '#64748B' }]}>SCHEDULED</Text>
+                <Text style={styles.tripTimeBadge}>Tomorrow 08:00</Text>
+              </View>
+              <Text style={styles.tripRouteText}>AGL HQ ➔ WMT Container Terminal</Text>
+              <Text style={[styles.emptyText, { marginTop: 6, color: '#94A3B8' }]}>Trip starts tomorrow — no actions available yet.</Text>
             </View>
           </View>
         )}
@@ -614,30 +747,96 @@ export default function App() {
         {/* SCREEN 3: MANAGER HUB */}
         {activeTab === 'MANAGER' && (
           <View style={styles.section}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardBadge}>MANAGER HUB • FLEET & APPROVALS</Text>
-              <Text style={styles.titleText}>Business Trip Pool Vehicles</Text>
+            {/* Header Banner */}
+            <View style={[styles.driverHeroBanner, { backgroundColor: '#312E81' }]}>
+              <Text style={styles.driverHeroBadge}>MANAGER CONTROL HUB • WALVIS BAY FLEET</Text>
+              <Text style={styles.driverTitle}>Manager Console: Klaus Schneider</Text>
+              <Text style={styles.driverSub}>Approve team transport requests & reserve company pool vehicles.</Text>
             </View>
 
-            {/* Car Card 1 */}
+            {/* Pending Approvals Inbox */}
+            <Text style={styles.tripsListTitle}>Pending Approval Requests</Text>
+            {approval1Done === 'none' ? (
+              <View style={styles.offerCard}>
+                <View style={styles.offerHeaderRow}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <View style={[styles.pulseDot, { backgroundColor: '#6366F1' }]} />
+                    <Text style={[styles.offerBadge, { color: '#3730A3', backgroundColor: '#E0E7FF' }]}>PENDING MANAGER APPROVAL</Text>
+                  </View>
+                  <Text style={styles.offerTime}>pool-req-1</Text>
+                </View>
+
+                <View style={[styles.offerDetailsGrid, { borderColor: '#C7D2FE' }]}>
+                  <View>
+                    <Text style={styles.offerDetailLabel}>REQUESTER</Text>
+                    <Text style={[styles.offerRoute, { color: '#1E1B4B' }]}>Petrus Haimbodi</Text>
+                    <Text style={[styles.offerSub, { color: '#6366F1', marginTop: 0 }]}>Customs & Clearance Dept.</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.offerDetailLabel}>PURPOSE</Text>
+                    <Text style={[styles.offerRoute, { color: '#1E1B4B', fontSize: 12 }]}>On-site audit and cargo inspection at Customs Depot</Text>
+                  </View>
+                  <View>
+                    <Text style={styles.offerDetailLabel}>VEHICLE REQUESTED</Text>
+                    <Text style={[styles.offerRoute, { color: '#1E1B4B' }]}>Toyota Hilux 4x4</Text>
+                    <Text style={[styles.offerSub, { color: '#6366F1', marginTop: 0 }]}>N 882-102 WB • Tomorrow 09:00–17:00</Text>
+                  </View>
+                </View>
+
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity
+                    style={[styles.approveBtn, { flex: 1 }]}
+                    onPress={() => {
+                      setApproval1Done('approved');
+                      Alert.alert('Approved!', 'Vehicle reserved and locked in calendar.');
+                    }}
+                  >
+                    <Text style={styles.btnText}>✓ Approve & Reserve</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.rejectBtn}
+                    onPress={() => {
+                      setApproval1Done('rejected');
+                      Alert.alert('Declined', 'Request declined and requester notified.');
+                    }}
+                  >
+                    <Text style={styles.btnText}>✕ Decline</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ) : (
+              <View style={[styles.manifestCard, { marginBottom: 14 }]}>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: approval1Done === 'approved' ? '#059669' : '#DC2626', textAlign: 'center' }}>
+                  {approval1Done === 'approved' ? '✅ Request Approved — Vehicle Reserved' : '❌ Request Declined'}
+                </Text>
+              </View>
+            )}
+
+            {/* Pool Fleet Vehicles */}
+            <Text style={styles.tripsListTitle}>Available Pool Fleet Vehicles</Text>
+
+            {/* Car 1: Toyota Hilux */}
             <View style={styles.poolCarCard}>
-              <Image 
-                source={{ uri: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600' }} 
-                style={styles.carImage} 
+              <Image
+                source={{ uri: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=600' }}
+                style={styles.carImage}
               />
               <View style={styles.carInfo}>
-                <Text style={styles.carTitle}>Toyota Hilux Double Cab 4x4</Text>
-                <Text style={styles.carReg}>N 882-102 WB • 5 Seats • Diesel</Text>
-
-                <TouchableOpacity 
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.carTitle}>Toyota Hilux Double Cab 4x4</Text>
+                    <Text style={styles.carReg}>N 882-102 WB • 5 Seats • Diesel • 48,900 KM</Text>
+                  </View>
+                  <Text style={[styles.scheduledPill, { backgroundColor: '#059669' }]}>AVAILABLE</Text>
+                </View>
+                <TouchableOpacity
                   style={styles.primaryButton}
                   onPress={() => setPoolModalVisible(true)}
                 >
-                  <Text style={styles.primaryButtonText}>Book Vehicle for Business Trip</Text>
+                  <Text style={styles.primaryButtonText}>📅 Book for Business Trip</Text>
                 </TouchableOpacity>
-
                 {poolRequested && (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.secondaryButton}
                     onPress={() => {
                       setVehicleReturned(true);
@@ -650,29 +849,25 @@ export default function App() {
               </View>
             </View>
 
-            {/* Manager Approvals Section */}
-            <View style={[styles.myBookingsCard, { marginTop: 14 }]}>
-              <Text style={styles.cardTitle}>Pending Manager Approvals</Text>
-              <Text style={styles.subText}>Requester: Petrus Haimbodi (Customs & Clearance)</Text>
-              <Text style={styles.subText}>Purpose: Cargo inspection at Port of Walvis Bay</Text>
-              <Text style={styles.subText}>Vehicle: Toyota Hilux (N 882-102 WB)</Text>
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity 
-                  style={styles.approveBtn}
-                  onPress={() => {
-                    setManagerApproved(true);
-                    Alert.alert('Approved!', 'Vehicle reserved and locked in calendar.');
-                  }}
+            {/* Car 2: VW Polo Vivo */}
+            <View style={[styles.poolCarCard, { marginTop: 14 }]}>
+              <Image
+                source={{ uri: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600' }}
+                style={styles.carImage}
+              />
+              <View style={styles.carInfo}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.carTitle}>Volkswagen Polo Vivo Sedan</Text>
+                    <Text style={styles.carReg}>N 554-331 WB • 5 Seats • Petrol • 18,400 KM</Text>
+                  </View>
+                  <Text style={[styles.scheduledPill, { backgroundColor: '#059669' }]}>AVAILABLE</Text>
+                </View>
+                <TouchableOpacity
+                  style={styles.primaryButton}
+                  onPress={() => Alert.alert('Book VW Polo', 'Submit a request for the VW Polo Vivo sedan.')}
                 >
-                  <Text style={styles.btnText}>Approve & Reserve</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity 
-                  style={styles.rejectBtn}
-                  onPress={() => Alert.alert('Declined', 'Request declined.')}
-                >
-                  <Text style={styles.btnText}>Decline</Text>
+                  <Text style={styles.primaryButtonText}>📅 Book for Business Trip</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -682,83 +877,363 @@ export default function App() {
         {/* SCREEN 4: INSPECTOR GATE */}
         {activeTab === 'INSPECTOR' && (
           <View style={styles.section}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardBadge}>INSPECTOR GATE • VEHICLE RETURN CLEARANCE</Text>
-              <Text style={styles.titleText}>Return Inspection Protocol</Text>
+            {/* Header Banner */}
+            <View style={[styles.driverHeroBanner, { backgroundColor: '#4C1D95' }]}>
+              <Text style={styles.driverHeroBadge}>VEHICLE QUALITY CONTROL • INSPECTOR CONSOLE</Text>
+              <Text style={styles.driverTitle}>Inspector Portal: Maria Amadhila</Text>
+              <Text style={styles.driverSub}>Perform post-return inspections & enforce vehicle availability quality gates.</Text>
             </View>
-            
-            <View style={styles.myBookingsCard}>
-              <Text style={styles.cardTitle}>Clearance Protocol • N 882-102 WB</Text>
-              <Text style={styles.subText}>End Odometer: 49,045 KM</Text>
-              <Text style={styles.subText}>Fuel Level: 90%</Text>
-              <Text style={styles.subText}>Inspection Photos: 2 Attached</Text>
 
-              <TouchableOpacity 
-                style={styles.approveBtn}
-                onPress={() => {
-                  setInspectionPassed(true);
-                  Alert.alert('Passed!', 'Vehicle inspection cleared. Car unlocked back to AVAILABLE status.');
-                }}
-              >
-                <Text style={styles.btnText}>Complete Inspection & Release Car</Text>
-              </TouchableOpacity>
+            {/* Success notification */}
+            {completedInspections.length > 0 && (
+              <View style={[styles.manifestCard, { backgroundColor: '#D1FAE5', borderColor: '#6EE7B7' }]}>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: '#065F46' }}>
+                  ✅ Inspection Completed for {completedInspections[0].reg}! Result: {completedInspections[0].result}.
+                </Text>
+              </View>
+            )}
+
+            {/* Vehicle Post-Return Inspection Queue */}
+            <Text style={styles.tripsListTitle}>Vehicle Post-Return Inspection Queue</Text>
+
+            {[
+              { id: 'veh-bus-1', make: 'Toyota', model: 'Coaster Executive Bus', reg: 'N 142-991 WB', mileage: '34,200', fuel: 'Diesel', status: 'AVAILABLE', statusColor: '#059669' },
+              { id: 'veh-pool-1', make: 'Toyota', model: 'Hilux Double Cab 4x4', reg: 'N 882-102 WB', mileage: '48,900', fuel: 'Diesel', status: 'AVAILABLE', statusColor: '#059669' },
+              { id: 'veh-pool-2', make: 'Volkswagen', model: 'Polo Vivo Sedan', reg: 'N 554-331 WB', mileage: '18,400', fuel: 'Petrol', status: 'AVAILABLE', statusColor: '#059669' },
+            ].map((v) => (
+              <View key={v.id} style={styles.tripControlCard}>
+                <View style={styles.tripStatusHeader}>
+                  <Text style={styles.passengerDept}>Fleet #{v.reg}</Text>
+                  <Text style={[styles.statusPill, { backgroundColor: v.statusColor }]}>{v.status}</Text>
+                </View>
+                <Text style={[styles.tripRouteText, { fontSize: 14, marginBottom: 4 }]}>{v.make} {v.model}</Text>
+                <Text style={styles.passengerDept}>Odometer: {v.mileage} km • {v.fuel}</Text>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { marginTop: 12, backgroundColor: '#7C3AED' }]}
+                  onPress={() => {
+                    setActiveInspectVehicle(v.id);
+                    setInspOdometer(v.mileage.replace(',', ''));
+                    setInspDecision('PASSED');
+                    setInspNotes('');
+                  }}
+                >
+                  <Text style={styles.primaryButtonText}>🛡️ Perform Inspection</Text>
+                </TouchableOpacity>
+              </View>
+            ))}
+
+            {/* Completed Inspection Audit Log */}
+            <Text style={styles.tripsListTitle}>Completed Inspection Audit Logs</Text>
+            <View style={styles.tripControlCard}>
+              {completedInspections.length === 0 ? (
+                <Text style={styles.emptyText}>No inspections completed yet. Perform an inspection above.</Text>
+              ) : (
+                completedInspections.map((insp) => (
+                  <View key={insp.id} style={[styles.manifestItem, { paddingVertical: 10 }]}>
+                    <View style={styles.passengerInfo}>
+                      <Text style={styles.passengerName}>Post-Return Inspection #{insp.id.slice(0, 6)}</Text>
+                      <Text style={styles.passengerDept}>Odometer: {insp.odometer} km • Fuel: {insp.fuel}% • {insp.vehicle}</Text>
+                    </View>
+                    <Text style={[styles.statusPill, { backgroundColor: insp.result === 'PASSED' ? '#059669' : insp.result === 'FAILED' ? '#DC2626' : '#D97706', fontSize: 9 }]}>
+                      {insp.result}
+                    </Text>
+                  </View>
+                ))
+              )}
             </View>
           </View>
+        )}
+
+        {/* INSPECTION MODAL */}
+        {activeInspectVehicle && (
+          <Modal visible={true} transparent animationType="slide">
+            <View style={styles.modalOverlay}>
+              <View style={[styles.modalContent, { maxHeight: '90%' }]}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#F1F5F9', paddingBottom: 12, marginBottom: 12 }}>
+                  <View>
+                    <Text style={styles.modalTitle}>Vehicle Post-Return Inspection</Text>
+                    <Text style={styles.passengerDept}>
+                      {['veh-bus-1', 'veh-pool-1', 'veh-pool-2'].indexOf(activeInspectVehicle) === 0 ? 'Toyota Coaster Executive Bus (N 142-991 WB)'
+                        : ['veh-bus-1', 'veh-pool-1', 'veh-pool-2'].indexOf(activeInspectVehicle) === 1 ? 'Toyota Hilux Double Cab (N 882-102 WB)'
+                        : 'Volkswagen Polo Vivo (N 554-331 WB)'}
+                    </Text>
+                  </View>
+                  <TouchableOpacity onPress={() => setActiveInspectVehicle(null)}>
+                    <Text style={{ color: '#64748B', fontWeight: 'bold', fontSize: 13 }}>✕ Close</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <ScrollView showsVerticalScrollIndicator={false}>
+                  {/* Odometer & Fuel inputs */}
+                  <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.offerDetailLabel}>ODOMETER READING (KM)</Text>
+                      <TextInput
+                        style={[styles.inputField, { marginTop: 4 }]}
+                        value={inspOdometer}
+                        onChangeText={setInspOdometer}
+                        keyboardType="numeric"
+                        placeholder="e.g. 49045"
+                      />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.offerDetailLabel}>FUEL LEVEL (%)</Text>
+                      <TextInput
+                        style={[styles.inputField, { marginTop: 4 }]}
+                        value={inspFuel}
+                        onChangeText={setInspFuel}
+                        keyboardType="numeric"
+                        placeholder="e.g. 85"
+                      />
+                    </View>
+                  </View>
+
+                  {/* Inspection Gate Decision */}
+                  <Text style={[styles.offerDetailLabel, { marginBottom: 6 }]}>INSPECTION GATE DECISION</Text>
+                  <View style={{ flexDirection: 'row', gap: 8, marginBottom: 12 }}>
+                    {(['PASSED', 'FAILED', 'REQUIRES_ATTENTION'] as const).map((d) => (
+                      <TouchableOpacity
+                        key={d}
+                        style={[
+                          { flex: 1, paddingVertical: 10, borderRadius: 12, borderWidth: 1, alignItems: 'center' },
+                          inspDecision === d
+                            ? { backgroundColor: d === 'PASSED' ? '#059669' : d === 'FAILED' ? '#DC2626' : '#D97706', borderColor: 'transparent' }
+                            : { backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }
+                        ]}
+                        onPress={() => setInspDecision(d)}
+                      >
+                        <Text style={{ fontSize: 10, fontWeight: '900', color: inspDecision === d ? '#FFF' : '#64748B' }}>
+                          {d === 'PASSED' ? 'PASSED ✅' : d === 'FAILED' ? 'FAILED ❌' : 'ATTENTION ⚠️'}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+
+                  {/* Damage Notes */}
+                  <Text style={[styles.offerDetailLabel, { marginBottom: 4 }]}>DAMAGE & INSPECTION NOTES</Text>
+                  <TextInput
+                    style={[styles.inputField, { height: 80, textAlignVertical: 'top', paddingTop: 8 }]}
+                    value={inspNotes}
+                    onChangeText={setInspNotes}
+                    placeholder="Record any exterior scratches, tire condition, or interior cleanliness notes..."
+                    multiline
+                  />
+
+                  {/* Submit / Cancel */}
+                  <View style={[styles.buttonRow, { marginTop: 16 }]}>
+                    <TouchableOpacity
+                      style={[styles.rejectBtn, { flex: 1, backgroundColor: 'transparent', borderWidth: 1, borderColor: '#E2E8F0' }]}
+                      onPress={() => setActiveInspectVehicle(null)}
+                    >
+                      <Text style={{ color: '#64748B', fontWeight: 'bold', fontSize: 12 }}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={[styles.approveBtn, { flex: 1, backgroundColor: '#7C3AED' }]}
+                      onPress={() => {
+                        const vehicleNames: Record<string, { name: string; reg: string }> = {
+                          'veh-bus-1': { name: 'Toyota Coaster', reg: 'N 142-991 WB' },
+                          'veh-pool-1': { name: 'Toyota Hilux', reg: 'N 882-102 WB' },
+                          'veh-pool-2': { name: 'VW Polo Vivo', reg: 'N 554-331 WB' },
+                        };
+                        const v = vehicleNames[activeInspectVehicle];
+                        setCompletedInspections(prev => [{ id: `insp-${Date.now()}`, vehicle: v.name, reg: v.reg, odometer: inspOdometer, fuel: inspFuel, result: inspDecision }, ...prev]);
+                        setActiveInspectVehicle(null);
+                        Alert.alert(
+                          'Inspection Submitted ✅',
+                          `${v.name} (${v.reg})\nResult: ${inspDecision}\nVehicle set to: ${inspDecision === 'PASSED' ? 'AVAILABLE' : 'UNDER_MAINTENANCE'}`
+                        );
+                      }}
+                    >
+                      <Text style={styles.btnText}>Submit Inspection</Text>
+                    </TouchableOpacity>
+                  </View>
+                </ScrollView>
+              </View>
+            </View>
+          </Modal>
         )}
 
         {/* SCREEN 5: ADMIN & BUSINESS RULES */}
         {activeTab === 'ADMIN' && (
           <View style={styles.section}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardBadge}>ADMIN PORTAL • SYSTEM CONTROL</Text>
-              <Text style={styles.titleText}>Business Rules & Transport Config</Text>
+            {/* Header Banner */}
+            <View style={[styles.driverHeroBanner, { backgroundColor: '#0F172A' }]}>
+              <Text style={styles.driverHeroBadge}>ADMIN PORTAL • SYSTEM CONTROL</Text>
+              <Text style={styles.driverTitle}>Business Rules & Transport Config</Text>
+              <Text style={styles.driverSub}>Configure fleet-wide transport rules applied across all bookings.</Text>
             </View>
 
-            <View style={styles.myBookingsCard}>
-              <Text style={styles.cardTitle}>Live Fleet Rules</Text>
-              <Text style={styles.subText}>• Cutoff Window: 12 Hours Notice</Text>
-              <Text style={styles.subText}>• Auto-Approve Shuttle Bookings: ENABLED</Text>
-              <Text style={styles.subText}>• Max Seats Per Employee: 4 Seats</Text>
-              <Text style={styles.subText}>• Driver Acceptance Timeout: 15 Mins</Text>
+            <Text style={styles.tripsListTitle}>Configurable Fleet Rules</Text>
 
-              <TouchableOpacity 
-                style={[styles.primaryButton, { marginTop: 12 }]}
-                onPress={() => Alert.alert('Rules Saved', 'Business rules updated across system!')}
-              >
-                <Text style={styles.primaryButtonText}>Save Rule Configurations</Text>
-              </TouchableOpacity>
+            {/* Rule 1: Cutoff Window */}
+            <View style={styles.tripControlCard}>
+              <Text style={styles.passengerName}>Booking Cutoff Window (Hours)</Text>
+              <Text style={styles.passengerDept}>Minimum hours notice required before trip departure</Text>
+              <View style={[styles.seatsRow, { marginTop: 10 }]}>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { flex: 1, marginRight: 8, paddingVertical: 10, backgroundColor: '#E2E8F0' }]}
+                  onPress={() => setRuleCutoffHours(String(Math.max(1, parseInt(ruleCutoffHours) - 1)))}
+                >
+                  <Text style={[styles.primaryButtonText, { color: NAVY }]}>−</Text>
+                </TouchableOpacity>
+                <Text style={[styles.scheduleTimeTitle, { textAlign: 'center', minWidth: 60 }]}>{ruleCutoffHours}h</Text>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { flex: 1, marginLeft: 8, paddingVertical: 10, backgroundColor: '#E2E8F0' }]}
+                  onPress={() => setRuleCutoffHours(String(parseInt(ruleCutoffHours) + 1))}
+                >
+                  <Text style={[styles.primaryButtonText, { color: NAVY }]}>+</Text>
+                </TouchableOpacity>
+              </View>
             </View>
+
+            {/* Rule 2: Auto-Approve Toggle */}
+            <View style={styles.tripControlCard}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.passengerName}>Auto-Approve Shuttle Bookings</Text>
+                  <Text style={styles.passengerDept}>Bookings made before cutoff window are automatically approved</Text>
+                </View>
+                <TouchableOpacity
+                  style={[styles.statusPill, { backgroundColor: ruleAutoApprove ? '#059669' : '#DC2626', paddingHorizontal: 14, paddingVertical: 8 }]}
+                  onPress={() => setRuleAutoApprove(prev => !prev)}
+                >
+                  <Text style={{ color: '#FFF', fontSize: 11, fontWeight: '900' }}>{ruleAutoApprove ? 'ENABLED' : 'DISABLED'}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Rule 3: Max Seats Per Employee */}
+            <View style={styles.tripControlCard}>
+              <Text style={styles.passengerName}>Max Seats Per Employee</Text>
+              <Text style={styles.passengerDept}>Maximum seats an employee can book per shuttle trip</Text>
+              <View style={[styles.seatsRow, { marginTop: 10 }]}>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { flex: 1, marginRight: 8, paddingVertical: 10, backgroundColor: '#E2E8F0' }]}
+                  onPress={() => setRuleMaxSeats(String(Math.max(1, parseInt(ruleMaxSeats) - 1)))}
+                >
+                  <Text style={[styles.primaryButtonText, { color: NAVY }]}>−</Text>
+                </TouchableOpacity>
+                <Text style={[styles.scheduleTimeTitle, { textAlign: 'center', minWidth: 60 }]}>{ruleMaxSeats} seats</Text>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { flex: 1, marginLeft: 8, paddingVertical: 10, backgroundColor: '#E2E8F0' }]}
+                  onPress={() => setRuleMaxSeats(String(parseInt(ruleMaxSeats) + 1))}
+                >
+                  <Text style={[styles.primaryButtonText, { color: NAVY }]}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Rule 4: Driver Acceptance Timeout */}
+            <View style={styles.tripControlCard}>
+              <Text style={styles.passengerName}>Driver Acceptance Timeout (Minutes)</Text>
+              <Text style={styles.passengerDept}>Time before system auto-reassigns trip to next available driver</Text>
+              <View style={[styles.seatsRow, { marginTop: 10 }]}>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { flex: 1, marginRight: 8, paddingVertical: 10, backgroundColor: '#E2E8F0' }]}
+                  onPress={() => setRuleDriverTimeout(String(Math.max(5, parseInt(ruleDriverTimeout) - 5)))}
+                >
+                  <Text style={[styles.primaryButtonText, { color: NAVY }]}>−</Text>
+                </TouchableOpacity>
+                <Text style={[styles.scheduleTimeTitle, { textAlign: 'center', minWidth: 60 }]}>{ruleDriverTimeout} min</Text>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { flex: 1, marginLeft: 8, paddingVertical: 10, backgroundColor: '#E2E8F0' }]}
+                  onPress={() => setRuleDriverTimeout(String(parseInt(ruleDriverTimeout) + 5))}
+                >
+                  <Text style={[styles.primaryButtonText, { color: NAVY }]}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Rule 5: Booking Window */}
+            <View style={styles.tripControlCard}>
+              <Text style={styles.passengerName}>Advance Booking Window (Days)</Text>
+              <Text style={styles.passengerDept}>How many days ahead employees can book shuttle seats</Text>
+              <View style={[styles.seatsRow, { marginTop: 10 }]}>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { flex: 1, marginRight: 8, paddingVertical: 10, backgroundColor: '#E2E8F0' }]}
+                  onPress={() => setRuleBookingWindow(String(Math.max(1, parseInt(ruleBookingWindow) - 1)))}
+                >
+                  <Text style={[styles.primaryButtonText, { color: NAVY }]}>−</Text>
+                </TouchableOpacity>
+                <Text style={[styles.scheduleTimeTitle, { textAlign: 'center', minWidth: 60 }]}>{ruleBookingWindow} days</Text>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { flex: 1, marginLeft: 8, paddingVertical: 10, backgroundColor: '#E2E8F0' }]}
+                  onPress={() => setRuleBookingWindow(String(parseInt(ruleBookingWindow) + 1))}
+                >
+                  <Text style={[styles.primaryButtonText, { color: NAVY }]}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Rule 6: Inspector KM Threshold */}
+            <View style={styles.tripControlCard}>
+              <Text style={styles.passengerName}>Inspection Trigger KM Threshold</Text>
+              <Text style={styles.passengerDept}>Pool vehicles trigger mandatory inspection after this mileage</Text>
+              <View style={[styles.seatsRow, { marginTop: 10 }]}>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { flex: 1, marginRight: 8, paddingVertical: 10, backgroundColor: '#E2E8F0' }]}
+                  onPress={() => setRuleInspectorThreshold(String(Math.max(100, parseInt(ruleInspectorThreshold) - 100)))}
+                >
+                  <Text style={[styles.primaryButtonText, { color: NAVY }]}>−</Text>
+                </TouchableOpacity>
+                <Text style={[styles.scheduleTimeTitle, { textAlign: 'center', minWidth: 70 }]}>{ruleInspectorThreshold} KM</Text>
+                <TouchableOpacity
+                  style={[styles.primaryButton, { flex: 1, marginLeft: 8, paddingVertical: 10, backgroundColor: '#E2E8F0' }]}
+                  onPress={() => setRuleInspectorThreshold(String(parseInt(ruleInspectorThreshold) + 100))}
+                >
+                  <Text style={[styles.primaryButtonText, { color: NAVY }]}>+</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Save Button */}
+            <TouchableOpacity
+              style={[styles.primaryButton, { paddingVertical: 16, borderRadius: 16, marginTop: 4 }]}
+              onPress={() => Alert.alert('Rules Saved ✅', `Business rules updated across AGL fleet system!\n\n• Cutoff: ${ruleCutoffHours}h\n• Auto-Approve: ${ruleAutoApprove ? 'ON' : 'OFF'}\n• Max Seats: ${ruleMaxSeats}\n• Driver Timeout: ${ruleDriverTimeout} min\n• Booking Window: ${ruleBookingWindow} days\n• Inspection Trigger: ${ruleInspectorThreshold} KM`)}
+            >
+              <Text style={styles.primaryButtonText}>💾 Save All Rule Configurations</Text>
+            </TouchableOpacity>
           </View>
         )}
 
       </ScrollView>
 
-      {/* Mobile Bottom Tab Bar (Expo Go Navigation Bar) */}
+      {/* Mobile Bottom Tab Bar (Role-Filtered Navigation Bar) */}
       <View style={styles.tabBar}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('RIDER')}>
-          <Text style={[styles.tabIcon, activeTab === 'RIDER' && styles.tabActive]}>🧑‍💼</Text>
-          <Text style={[styles.tabLabel, activeTab === 'RIDER' && styles.tabActive]}>Rider Portal</Text>
-        </TouchableOpacity>
+        {isTabAllowed('RIDER') && (
+          <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('RIDER')}>
+            <Text style={[styles.tabIcon, activeTab === 'RIDER' && styles.tabActive]}>🧑‍💼</Text>
+            <Text style={[styles.tabLabel, activeTab === 'RIDER' && styles.tabActive]}>Rider Portal</Text>
+          </TouchableOpacity>
+        )}
 
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('DRIVER')}>
-          <Text style={[styles.tabIcon, activeTab === 'DRIVER' && styles.tabActive]}>📋</Text>
-          <Text style={[styles.tabLabel, activeTab === 'DRIVER' && styles.tabActive]}>Driver Console</Text>
-        </TouchableOpacity>
+        {isTabAllowed('DRIVER') && (
+          <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('DRIVER')}>
+            <Text style={[styles.tabIcon, activeTab === 'DRIVER' && styles.tabActive]}>📋</Text>
+            <Text style={[styles.tabLabel, activeTab === 'DRIVER' && styles.tabActive]}>Driver Console</Text>
+          </TouchableOpacity>
+        )}
 
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('MANAGER')}>
-          <Text style={[styles.tabIcon, activeTab === 'MANAGER' && styles.tabActive]}>👔</Text>
-          <Text style={[styles.tabLabel, activeTab === 'MANAGER' && styles.tabActive]}>Manager Hub</Text>
-        </TouchableOpacity>
+        {isTabAllowed('MANAGER') && (
+          <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('MANAGER')}>
+            <Text style={[styles.tabIcon, activeTab === 'MANAGER' && styles.tabActive]}>👔</Text>
+            <Text style={[styles.tabLabel, activeTab === 'MANAGER' && styles.tabActive]}>Manager Hub</Text>
+          </TouchableOpacity>
+        )}
 
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('INSPECTOR')}>
-          <Text style={[styles.tabIcon, activeTab === 'INSPECTOR' && styles.tabActive]}>🛡️</Text>
-          <Text style={[styles.tabLabel, activeTab === 'INSPECTOR' && styles.tabActive]}>Inspector Gate</Text>
-        </TouchableOpacity>
+        {isTabAllowed('INSPECTOR') && (
+          <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('INSPECTOR')}>
+            <Text style={[styles.tabIcon, activeTab === 'INSPECTOR' && styles.tabActive]}>🛡️</Text>
+            <Text style={[styles.tabLabel, activeTab === 'INSPECTOR' && styles.tabActive]}>Inspector Gate</Text>
+          </TouchableOpacity>
+        )}
 
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('ADMIN')}>
-          <Text style={[styles.tabIcon, activeTab === 'ADMIN' && styles.tabActive]}>⚙️</Text>
-          <Text style={[styles.tabLabel, activeTab === 'ADMIN' && styles.tabActive]}>Admin & Rules</Text>
-        </TouchableOpacity>
+        {isTabAllowed('ADMIN') && (
+          <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('ADMIN')}>
+            <Text style={[styles.tabIcon, activeTab === 'ADMIN' && styles.tabActive]}>⚙️</Text>
+            <Text style={[styles.tabLabel, activeTab === 'ADMIN' && styles.tabActive]}>Admin & Rules</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Booking Shuttle Seat Modal (Visual Seat Map) */}
@@ -1875,16 +2350,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#B45309',
   },
-  offerRoute: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#78350F',
-  },
   offerSub: {
     fontSize: 11,
     color: '#B45309',
     marginTop: 2,
-    marginBottom: 10,
+    marginBottom: 4,
+  },
+  offerRoute: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#78350F',
   },
   tripControlCard: {
     backgroundColor: '#FFF',
@@ -1925,4 +2400,66 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 8,
   },
+  driverHeroBanner: {
+    backgroundColor: NAVY,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 14,
+  },
+  driverHeroBadge: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: 'rgba(255,255,255,0.7)',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  tripsListTitle: {
+    fontSize: 15,
+    fontWeight: '900',
+    color: NAVY,
+    marginBottom: 12,
+  },
+  tripTimeBadge: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  offerDetailsGrid: {
+    backgroundColor: '#FFF',
+    borderRadius: 10,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#FDE68A',
+    marginBottom: 12,
+    gap: 8,
+  },
+  offerDetailLabel: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#9CA3AF',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
+  pulseDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#F59E0B',
+  },
+  manifestTitle: {
+    fontSize: 9,
+    fontWeight: '900',
+    color: '#64748B',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 8,
+  },
 });
+
+

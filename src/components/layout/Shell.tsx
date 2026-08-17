@@ -40,22 +40,41 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
 
   const isDriver = user.role === 'DRIVER' || user.role === 'SUPER_ADMIN';
   const isManager = user.role === 'MANAGER' || user.role === 'SUPER_ADMIN';
-  const isFleetAdmin = user.role === 'FLEET_ADMIN' || user.role === 'SUPER_ADMIN';
+  const isInspector = user.role === 'FLEET_ADMIN' || user.role === 'SUPER_ADMIN';
   const isAdmin = user.role === 'SUPER_ADMIN';
+  const isRider = user.role === 'EMPLOYEE' || user.role === 'MANAGER' || user.role === 'FLEET_ADMIN' || user.role === 'SUPER_ADMIN';
 
   const roleNavItems: Array<{ href: string; label: string; icon: any; show: boolean; badge?: string }> = [
-    { href: '/employee/dashboard', label: 'Rider Portal', icon: LayoutDashboard, show: true, badge: 'Rider' },
-    { href: '/driver/dashboard', label: 'Driver Console', icon: ClipboardList, show: true, badge: 'Driver' },
-    { href: '/manager/dashboard', label: 'Manager Hub', icon: CheckSquare, show: true, badge: 'Manager' },
-    { href: '/inspector/dashboard', label: 'Inspector Gate', icon: ShieldCheck, show: true, badge: 'Inspector' },
-    { href: '/admin/dashboard', label: 'Admin & Rules', icon: Settings, show: true, badge: 'Admin' },
+    { href: '/employee/dashboard', label: 'Rider Portal', icon: LayoutDashboard, show: isRider, badge: 'Rider' },
+    { href: '/driver/dashboard', label: 'Driver Console', icon: ClipboardList, show: isDriver, badge: 'Driver' },
+    { href: '/manager/dashboard', label: 'Manager Hub', icon: CheckSquare, show: isManager, badge: 'Manager' },
+    { href: '/inspector/dashboard', label: 'Inspector Gate', icon: ShieldCheck, show: isInspector, badge: 'Inspector' },
+    { href: '/admin/dashboard', label: 'Admin & Rules', icon: Settings, show: isAdmin, badge: 'Admin' },
   ];
 
   const fleetNavItems: Array<{ href: string; label: string; icon: any; show: boolean; badge?: string }> = [
-    { href: '/bus-schedule', label: 'Bus Schedule', icon: Bus, show: true },
-    { href: '/pool-vehicles', label: 'Pool Vehicles', icon: Car, show: true },
-    { href: '/my-bookings', label: 'My Bookings', icon: Calendar, show: true },
+    { href: '/bus-schedule', label: 'Bus Schedule', icon: Bus, show: isRider },
+    { href: '/pool-vehicles', label: 'Pool Vehicles', icon: Car, show: isManager || isInspector || isAdmin },
+    { href: '/my-bookings', label: 'My Bookings', icon: Calendar, show: isRider },
   ];
+
+  // Route-Level Authorization Check
+  const routePermissions: Record<string, boolean> = {
+    '/employee/dashboard': isRider,
+    '/driver/dashboard': isDriver,
+    '/manager/dashboard': isManager,
+    '/inspector/dashboard': isInspector,
+    '/admin/dashboard': isAdmin,
+  };
+
+  const isRestricted = pathname in routePermissions && !routePermissions[pathname];
+
+  const authorizedHome = 
+    isDriver && !isAdmin ? '/driver/dashboard' :
+    isManager && !isAdmin ? '/manager/dashboard' :
+    isInspector && !isAdmin ? '/inspector/dashboard' :
+    isAdmin ? '/admin/dashboard' :
+    '/employee/dashboard';
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -64,12 +83,12 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
       <div className="flex-1 w-full flex">
         
         {/* Desktop Sidebar Navigation */}
-        <aside className="hidden lg:block w-64 p-4 border-r border-slate-200/80 bg-white min-h-[calc(100vh-4rem)]">
+        <aside className="w-64 flex-shrink-0 p-4 border-r border-slate-200/80 bg-white min-h-[calc(100vh-4rem)]">
           <div className="space-y-4">
             <div>
               <p className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Role Dashboards</p>
               <div className="space-y-1">
-                {roleNavItems.map((item) => {
+                {roleNavItems.filter(item => item.show).map((item) => {
                   const Icon = item.icon;
                   const active = pathname === item.href;
                   return (
@@ -102,7 +121,7 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
             <div>
               <p className="px-3 text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Fleet Dispatch & Schedules</p>
               <div className="space-y-1">
-                {fleetNavItems.map((item) => {
+                {fleetNavItems.filter(item => item.show).map((item) => {
                   const Icon = item.icon;
                   const active = pathname === item.href;
                   return (
@@ -152,32 +171,30 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
         </aside>
 
         {/* Main Content View */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8 max-w-full overflow-x-hidden">
-          {children}
+        <main className="flex-1 p-6 lg:p-8 pb-8 max-w-full overflow-x-auto">
+          {isRestricted ? (
+            <div className="bg-white border border-rose-200 rounded-3xl p-8 max-w-lg mx-auto my-12 shadow-xl text-center space-y-4">
+              <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-black">
+                🔒
+              </div>
+              <h2 className="text-xl font-black text-slate-900">Access Restricted</h2>
+              <p className="text-sm text-slate-600">
+                Your corporate account role (<span className="font-bold text-[#1C355E]">{user.role.replace('_', ' ')}</span>) does not have authorization to view this console.
+              </p>
+              <div className="pt-2">
+                <Link
+                  href={authorizedHome}
+                  className="inline-block px-6 py-2.5 bg-[#1C355E] text-white text-xs font-extrabold rounded-xl shadow-md hover:bg-slate-800 transition-all"
+                >
+                  Return to Your Authorized Dashboard
+                </Link>
+              </div>
+            </div>
+          ) : (
+            children
+          )}
         </main>
       </div>
-
-      {/* Mobile Bottom Navigation Bar (App Experience for Phones) */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 px-2 py-1.5 shadow-2xl flex justify-around items-center">
-        {roleNavItems.filter(item => item.show).slice(0, 5).map((item) => {
-          const Icon = item.icon;
-          const active = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition-all ${
-                active ? 'text-[#1C355E] font-bold' : 'text-slate-400 hover:text-slate-600'
-              }`}
-            >
-              <div className={`p-1 rounded-lg ${active ? 'bg-amber-100 text-[#1C355E]' : ''}`}>
-                <Icon className="w-5 h-5" />
-              </div>
-              <span className="text-[10px] mt-0.5 leading-none">{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
 
     </div>
   );

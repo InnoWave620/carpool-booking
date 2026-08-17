@@ -13,14 +13,43 @@ export default function EmployeeDashboard() {
   const [user, setUser] = useState<Employee | null>(null);
   const [trips, setTrips] = useState<BusTrip[]>(INITIAL_BUS_TRIPS);
   const [bookings, setBookings] = useState<BusBooking[]>(INITIAL_BUS_BOOKINGS);
+  const [loading, setLoading] = useState(true);
 
   const [selectedTrip, setSelectedTrip] = useState<BusTrip | null>(null);
   const [selectedSeat, setSelectedSeat] = useState<string | null>(null);
   const [bookingMessage, setBookingMessage] = useState<string | null>(null);
   const [activeTabFilter, setActiveTabFilter] = useState<'ALL' | 'UPCOMING' | 'MY_TRIPS'>('UPCOMING');
 
+  const loadData = async () => {
+    try {
+      const [tripsRes, bookingsRes] = await Promise.all([
+        fetch('/api/trips').then(r => r.ok ? r.json() : null),
+        fetch('/api/bookings').then(r => r.ok ? r.json() : null),
+      ]);
+      if (tripsRes && tripsRes.length > 0) {
+        // Map database trips to UI model
+        const formatted = tripsRes.map((t: any) => ({
+          ...t,
+          originLocationId: t.originLocationId,
+          destinationLocationId: t.destinationLocationId,
+          departureTime: typeof t.departureTime === 'string' ? t.departureTime : new Date(t.departureTime).toISOString(),
+          arrivalTime: typeof t.arrivalTime === 'string' ? t.arrivalTime : new Date(t.arrivalTime).toISOString(),
+        }));
+        setTrips(formatted);
+      }
+      if (bookingsRes && bookingsRes.length > 0) {
+        setBookings(bookingsRes);
+      }
+    } catch (e) {
+      console.warn('Using local fallback for trips/bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     setUser(getActiveUser());
+    loadData();
   }, []);
 
   if (!user) return null;
@@ -31,20 +60,38 @@ export default function EmployeeDashboard() {
 
   const myBookings = bookings.filter((b) => b.employeeId === user.id);
 
-  const handleConfirmSeatBooking = () => {
+  const handleConfirmSeatBooking = async () => {
     if (!selectedTrip || !selectedSeat) return;
 
-    const result = validateAndBookSeat(selectedTrip.id, user.id, selectedSeat, bookings, trips);
-    setBookingMessage(result.message);
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          busTripId: selectedTrip.id,
+          employeeId: user.id,
+          seatNumber: selectedSeat,
+          riderCategory: 'AGL_WORKER',
+        }),
+      });
 
-    if (result.success && result.updatedBookings && result.updatedTrip) {
-      setBookings(result.updatedBookings);
-      setTrips((prev) => prev.map((t) => (t.id === result.updatedTrip!.id ? result.updatedTrip! : t)));
-      setTimeout(() => {
-        setSelectedTrip(null);
-        setSelectedSeat(null);
-        setBookingMessage(null);
-      }, 1500);
+      if (res.ok) {
+        const newBooking = await res.json();
+        setBookings(prev => [newBooking, ...prev]);
+        setTrips(prev => prev.map(t => t.id === selectedTrip.id ? { ...t, availableSeats: Math.max(0, t.availableSeats - 1) } : t));
+        setBookingMessage(`🎉 Seat #${selectedSeat} successfully booked in live database!`);
+        setTimeout(() => {
+          setSelectedTrip(null);
+          setSelectedSeat(null);
+          setBookingMessage(null);
+          loadData();
+        }, 1500);
+      } else {
+        const err = await res.json();
+        setBookingMessage(`❌ ${err.error || 'Failed to book seat'}`);
+      }
+    } catch (err: any) {
+      setBookingMessage(`❌ ${err.message}`);
     }
   };
 
