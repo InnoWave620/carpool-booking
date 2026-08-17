@@ -39,6 +39,8 @@ export default function App() {
   const [myBookings, setMyBookings] = useState<string[]>([]);
   const [bookingModalVisible, setBookingModalVisible] = useState(false);
   const [seatsRequested, setSeatsRequested] = useState(1);
+  const [selectedSeatNumber, setSelectedSeatNumber] = useState('01');
+  const [riderFilter, setRiderFilter] = useState<'UPCOMING' | 'MY_TRIPS' | 'ALL'>('UPCOMING');
 
   // Driver Controlled Trip State Machine
   const [tripStatus, setTripStatus] = useState<'SCHEDULED' | 'BOARDING' | 'EN_ROUTE' | 'ARRIVED' | 'EMPTYING' | 'COMPLETED'>('SCHEDULED');
@@ -256,51 +258,124 @@ export default function App() {
         {/* SCREEN 1: RIDER PORTAL */}
         {activeTab === 'RIDER' && (
           <View style={styles.section}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardBadge}>RIDER PORTAL • COMPANY SHUTTLE</Text>
-              <Text style={styles.titleText}>HQ ➔ WMT Container Terminal</Text>
-              <Text style={styles.subText}>Fixed departure window: 08:00 AM</Text>
+            {/* Dark Navy Hero Welcome Banner */}
+            <View style={styles.heroCard}>
+              <View style={styles.heroBadgeRow}>
+                <Text style={styles.heroBadge}>📍 AGL Employee Rider Portal • Walvis Bay</Text>
+              </View>
+              <Text style={styles.heroGreeting}>Hello, {activeUser.name.split(' ')[0]}! 👋</Text>
+              <Text style={styles.heroSubText}>
+                Reserve shuttle bus seats with visual seat selection and track active trips in real time.
+              </Text>
             </View>
 
-            {/* Shuttle Vehicle Card */}
-            <View style={styles.shuttleCard}>
-              <View style={styles.shuttleRow}>
-                <Text style={styles.busReg}>N 142-991 WB</Text>
-                <Text style={styles.cutoffBadge}>≥12h Auto-Approved</Text>
-              </View>
-
-              <View style={styles.timeBox}>
-                <Text style={styles.timeText}>08:00 AM</Text>
-                <Text style={styles.routeText}>AGL HQ ➔ WMT Port Terminal</Text>
-              </View>
-
-              <View style={styles.seatRow}>
-                <Text style={styles.seatLabel}>Available Seats:</Text>
-                <Text style={styles.seatCount}>{availableSeats} of 22 Seats Left</Text>
-              </View>
+            {/* Filter Navigation Pills */}
+            <View style={styles.filterPillRow}>
+              <TouchableOpacity 
+                style={[styles.filterPill, riderFilter === 'UPCOMING' && styles.filterPillActive]}
+                onPress={() => setRiderFilter('UPCOMING')}
+              >
+                <Text style={[styles.filterPillText, riderFilter === 'UPCOMING' && styles.filterPillTextActive]}>
+                  Upcoming Bus Schedules
+                </Text>
+              </TouchableOpacity>
 
               <TouchableOpacity 
-                style={styles.primaryButton}
-                onPress={() => setBookingModalVisible(true)}
+                style={[styles.filterPill, riderFilter === 'MY_TRIPS' && styles.filterPillActive]}
+                onPress={() => setRiderFilter('MY_TRIPS')}
               >
-                <Text style={styles.primaryButtonText}>Book Shuttle Seats</Text>
+                <Text style={[styles.filterPillText, riderFilter === 'MY_TRIPS' && styles.filterPillTextActive]}>
+                  My Trips ({myBookings.length})
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={[styles.filterPill, riderFilter === 'ALL' && styles.filterPillActive]}
+                onPress={() => setRiderFilter('ALL')}
+              >
+                <Text style={[styles.filterPillText, riderFilter === 'ALL' && styles.filterPillTextActive]}>
+                  All Trips
+                </Text>
               </TouchableOpacity>
             </View>
 
-            {/* My Active Bookings */}
-            <View style={styles.myBookingsCard}>
-              <Text style={styles.cardTitle}>My Bus Reservations ({myBookings.length})</Text>
-              {myBookings.length === 0 ? (
-                <Text style={styles.emptyText}>No active shuttle seat bookings.</Text>
-              ) : (
-                myBookings.map((b, idx) => (
-                  <View key={idx} style={styles.bookingItem}>
-                    <Text style={styles.bookingText}>{b}</Text>
-                    <Text style={styles.approvedBadge}>AUTO APPROVED</Text>
+            {/* UPCOMING BUS SCHEDULES LIST */}
+            {riderFilter === 'UPCOMING' && (
+              <View style={{ gap: 14 }}>
+                {/* Schedule Card 1: 08:00 Departure */}
+                <View style={styles.scheduleCard}>
+                  <View style={styles.scheduleHeaderRow}>
+                    <Text style={styles.scheduledPill}>SCHEDULED</Text>
+                    <Text style={styles.noticeWindowText}>12h Notice Window</Text>
                   </View>
-                ))
-              )}
-            </View>
+
+                  <Text style={styles.scheduleTimeTitle}>08:00 Departure</Text>
+                  <Text style={styles.scheduleRouteSub}>AGL HQ ➔ WMT Container Port</Text>
+
+                  <View style={styles.seatsRow}>
+                    <Text style={styles.seatsLabel}>Seats Remaining:</Text>
+                    <Text style={styles.seatsValue}>{availableSeats} / 22</Text>
+                  </View>
+
+                  <TouchableOpacity 
+                    style={styles.selectSeatBtn}
+                    onPress={() => setBookingModalVisible(true)}
+                  >
+                    <Text style={styles.selectSeatBtnText}>🚌 Select Seat & Book</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Schedule Card 2: 09:00 Departure */}
+                <View style={styles.scheduleCard}>
+                  <View style={styles.scheduleHeaderRow}>
+                    <Text style={styles.scheduledPill}>SCHEDULED</Text>
+                    <Text style={styles.noticeWindowText}>12h Notice Window</Text>
+                  </View>
+
+                  <Text style={styles.scheduleTimeTitle}>09:00 Departure</Text>
+                  <Text style={styles.scheduleRouteSub}>AGL HQ ➔ WMT Container Port</Text>
+
+                  <View style={styles.seatsRow}>
+                    <Text style={styles.seatsLabel}>Seats Remaining:</Text>
+                    <Text style={styles.seatsValue}>20 / 22</Text>
+                  </View>
+
+                  <TouchableOpacity 
+                    style={styles.selectSeatBtn}
+                    onPress={() => setBookingModalVisible(true)}
+                  >
+                    <Text style={styles.selectSeatBtnText}>🚌 Select Seat & Book</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+
+            {/* MY TRIPS LIST */}
+            {riderFilter === 'MY_TRIPS' && (
+              <View style={styles.myBookingsCard}>
+                <Text style={styles.cardTitle}>My Bus Reservations ({myBookings.length})</Text>
+                {myBookings.length === 0 ? (
+                  <Text style={styles.emptyText}>No active shuttle seat bookings.</Text>
+                ) : (
+                  myBookings.map((b, idx) => (
+                    <View key={idx} style={styles.bookingItem}>
+                      <Text style={styles.bookingText}>{b}</Text>
+                      <Text style={styles.approvedBadge}>AUTO APPROVED</Text>
+                    </View>
+                  ))
+                )}
+              </View>
+            )}
+
+            {/* ALL TRIPS LIST */}
+            {riderFilter === 'ALL' && (
+              <View style={styles.myBookingsCard}>
+                <Text style={styles.cardTitle}>All Scheduled Shuttles today</Text>
+                <Text style={styles.subText}>• 08:00 AM Departure • Coaster N 142-991 WB (16 Seats left)</Text>
+                <Text style={styles.subText}>• 09:00 AM Departure • Coaster N 882-104 WB (20 Seats left)</Text>
+                <Text style={styles.subText}>• 17:00 PM Departure • Coaster N 142-991 WB (22 Seats left)</Text>
+              </View>
+            )}
           </View>
         )}
 
@@ -589,27 +664,68 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-      {/* Booking Shuttle Seat Modal */}
+      {/* Booking Shuttle Seat Modal (Visual Seat Map) */}
       <Modal visible={bookingModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Shuttle Seat</Text>
-            <Text style={styles.subText}>08:00 HQ ➔ WMT Container Terminal</Text>
+            <Text style={styles.modalTitle}>Visual Bus Seat Selection</Text>
+            <Text style={styles.subText}>08:00 AM • HQ ➔ WMT Container Terminal (Coaster Bus)</Text>
 
-            <View style={styles.seatPickerRow}>
-              {[1, 2, 3, 4].map(num => (
-                <TouchableOpacity 
-                  key={num} 
-                  style={[styles.seatNumBtn, seatsRequested === num && styles.seatNumBtnActive]}
-                  onPress={() => setSeatsRequested(num)}
-                >
-                  <Text style={[styles.seatNumText, seatsRequested === num && styles.seatNumTextActive]}>{num}</Text>
-                </TouchableOpacity>
-              ))}
+            {/* Top-Down Bus Layout Diagram */}
+            <View style={styles.busDiagramContainer}>
+              <View style={styles.driverCabBox}>
+                <Text style={styles.driverCabText}>🚌 FRONT • DRIVER CAB</Text>
+              </View>
+
+              <View style={styles.seatGrid}>
+                {['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'].map((sNum) => {
+                  const isBooked = sNum === '02' || sNum === '05';
+                  const isSelected = selectedSeatNumber === sNum;
+
+                  return (
+                    <TouchableOpacity
+                      key={sNum}
+                      disabled={isBooked}
+                      style={[
+                        styles.seatBox,
+                        isBooked && styles.seatBooked,
+                        isSelected && styles.seatSelected,
+                      ]}
+                      onPress={() => setSelectedSeatNumber(sNum)}
+                    >
+                      <Text style={[
+                        styles.seatBoxText,
+                        isBooked && styles.seatBookedText,
+                        isSelected && styles.seatSelectedText,
+                      ]}>
+                        {sNum}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Legend Row */}
+              <View style={styles.legendRow}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#E2E8F0', borderWidth: 1, borderColor: '#94A3B8' }]} />
+                  <Text style={styles.legendText}>Available</Text>
+                </View>
+
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: NAVY }]} />
+                  <Text style={styles.legendText}>Selected</Text>
+                </View>
+
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendDot, { backgroundColor: '#CBD5E1' }]} />
+                  <Text style={styles.legendText}>Booked</Text>
+                </View>
+              </View>
             </View>
 
-            <TouchableOpacity style={styles.primaryButton} onPress={handleBookShuttle}>
-              <Text style={styles.primaryButtonText}>Confirm Seat #{seatsRequested}</Text>
+            <TouchableOpacity style={styles.primaryButton} onPress={() => handleBookShuttle('08:00 AM')}>
+              <Text style={styles.primaryButtonText}>Confirm Reservation (Seat #{selectedSeatNumber})</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.closeBtn} onPress={() => setBookingModalVisible(false)}>
@@ -680,7 +796,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: NAVY,
+    backgroundColor: GRAY_BG,
   },
   header: {
     backgroundColor: NAVY,
@@ -734,7 +850,207 @@ const styles = StyleSheet.create({
   scrollContent: {
     backgroundColor: GRAY_BG,
     padding: 16,
-    paddingBottom: 80,
+    paddingBottom: 100,
+  },
+  heroCard: {
+    backgroundColor: NAVY,
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 4,
+    elevation: 4,
+  },
+  heroBadgeRow: {
+    marginBottom: 8,
+  },
+  heroBadge: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: GOLD,
+    backgroundColor: '#25467A',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+  },
+  heroGreeting: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#FFF',
+    marginBottom: 6,
+  },
+  heroSubText: {
+    fontSize: 12,
+    color: '#94A3B8',
+    lineHeight: 18,
+  },
+  filterPillRow: {
+    flexDirection: 'row',
+    gap: 6,
+    marginVertical: 4,
+  },
+  filterPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#FFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  filterPillActive: {
+    backgroundColor: NAVY,
+    borderColor: NAVY,
+  },
+  filterPillText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  filterPillTextActive: {
+    color: '#FFF',
+  },
+  scheduleCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 18,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    elevation: 2,
+  },
+  scheduleHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  scheduledPill: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#0369A1',
+    backgroundColor: '#E0F2FE',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  noticeWindowText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  scheduleTimeTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: NAVY,
+  },
+  scheduleRouteSub: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+    marginBottom: 12,
+  },
+  seatsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  seatsLabel: {
+    fontSize: 12,
+    color: '#64748B',
+  },
+  seatsValue: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#059669',
+  },
+  selectSeatBtn: {
+    backgroundColor: NAVY,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  selectSeatBtnText: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  busDiagramContainer: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 14,
+    padding: 12,
+    marginVertical: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  driverCabBox: {
+    backgroundColor: '#CBD5E1',
+    paddingVertical: 6,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  driverCabText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: NAVY,
+  },
+  seatGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    justifyContent: 'center',
+  },
+  seatBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: '#FFF',
+    borderWidth: 1.5,
+    borderColor: '#CBD5E1',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  seatBooked: {
+    backgroundColor: '#CBD5E1',
+    borderColor: '#94A3B8',
+  },
+  seatSelected: {
+    backgroundColor: NAVY,
+    borderColor: NAVY,
+  },
+  seatBoxText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: NAVY,
+  },
+  seatBookedText: {
+    color: '#64748B',
+    textDecorationLine: 'line-through',
+  },
+  seatSelectedText: {
+    color: GOLD,
+  },
+  legendRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 12,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  legendText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#64748B',
   },
   section: {
     gap: 16,
