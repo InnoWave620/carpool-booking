@@ -40,15 +40,22 @@ export default function App() {
   const [bookingModalVisible, setBookingModalVisible] = useState(false);
   const [seatsRequested, setSeatsRequested] = useState(1);
 
-  // Driver Console State
+  // Driver Controlled Trip State Machine
+  const [tripStatus, setTripStatus] = useState<'SCHEDULED' | 'BOARDING' | 'EN_ROUTE' | 'ARRIVED' | 'EMPTYING' | 'COMPLETED'>('SCHEDULED');
+  const [hasTripAssignmentOffer, setHasTripAssignmentOffer] = useState(true);
   const [checkedPassengers, setCheckedPassengers] = useState<Record<string, boolean>>({});
-  const [pendingDriverApproval, setPendingDriverApproval] = useState(true);
 
-  // Pool State
+  // Pool State & Manager Booking
   const [poolRequested, setPoolRequested] = useState(false);
   const [managerApproved, setManagerApproved] = useState(false);
   const [vehicleReturned, setVehicleReturned] = useState(false);
   const [inspectionPassed, setInspectionPassed] = useState(false);
+
+  // Manager Pool Booking Modal State
+  const [poolModalVisible, setPoolModalVisible] = useState(false);
+  const [poolPurpose, setPoolPurpose] = useState('');
+  const [poolStartDateTime, setPoolStartDateTime] = useState('2026-08-18 08:00');
+  const [poolEndDateTime, setPoolEndDateTime] = useState('2026-08-18 17:00');
 
   const handleMobileLogin = (empName?: string, empEmail?: string, empRole?: string, empAvatar?: string) => {
     setActiveUser({
@@ -295,47 +302,113 @@ export default function App() {
         {activeTab === 'DRIVER' && (
           <View style={styles.section}>
             <View style={styles.driverHeader}>
-              <Text style={styles.driverTitle}>Driver Dispatch Console</Text>
-              <Text style={styles.driverSub}>Driver: Johannes Nangolo • Coaster Bus</Text>
+              <Text style={styles.driverTitle}>Driver Trip Console</Text>
+              <Text style={styles.driverSub}>Driver: Johannes Nangolo • Coaster Bus (N 142-991 WB)</Text>
             </View>
 
-            {/* Pending Late Approval */}
-            {pendingDriverApproval && (
-              <View style={styles.pendingBox}>
-                <Text style={styles.pendingTitle}>Pending Late Booking (under 12h)</Text>
-                <Text style={styles.pendingDesc}>Selma Shikongo requested 4 seats for 08:00 HQ ➔ WMT shuttle.</Text>
-                
+            {/* Trip Assignment Offer Banner */}
+            {hasTripAssignmentOffer && (
+              <View style={styles.offerCard}>
+                <View style={styles.offerHeaderRow}>
+                  <Text style={styles.offerBadge}>NEW TRIP OFFER</Text>
+                  <Text style={styles.offerTime}>Attempt #1</Text>
+                </View>
+
+                <Text style={styles.offerRoute}>08:00 AM • AGL HQ ➔ WMT Port</Text>
+                <Text style={styles.offerSub}>Vehicle: Coaster Bus (N 142-991 WB)</Text>
+
                 <View style={styles.buttonRow}>
                   <TouchableOpacity 
                     style={styles.approveBtn}
                     onPress={() => {
-                      setPendingDriverApproval(false);
-                      Alert.alert('Approved', 'Passenger request approved!');
+                      setHasTripAssignmentOffer(false);
+                      Alert.alert('Assignment Accepted', 'Trip confirmed! Ready for boarding.');
                     }}
                   >
-                    <Text style={styles.btnText}>Approve</Text>
+                    <Text style={styles.btnText}>ACCEPT ASSIGNMENT</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity 
                     style={styles.rejectBtn}
                     onPress={() => {
-                      setPendingDriverApproval(false);
-                      Alert.alert('Declined', 'Request declined.');
+                      setHasTripAssignmentOffer(false);
+                      Alert.alert('Assignment Declined', 'Offer rejected. System dispatching to next candidate driver.');
                     }}
                   >
-                    <Text style={styles.btnText}>Decline</Text>
+                    <Text style={styles.btnText}>REJECT</Text>
                   </TouchableOpacity>
                 </View>
               </View>
             )}
 
-            {/* Passenger Boarding Manifest */}
+            {/* Active Trip Status & Controlled Action Buttons */}
+            <View style={styles.tripControlCard}>
+              <View style={styles.tripStatusHeader}>
+                <Text style={styles.cardTitle}>Current Active Trip</Text>
+                <Text style={styles.statusPill}>{tripStatus}</Text>
+              </View>
+
+              <Text style={styles.tripRouteText}>08:00 AM • AGL HQ ➔ Walvis Bay Container Terminal</Text>
+
+              <View style={styles.actionButtonContainer}>
+                {tripStatus === 'SCHEDULED' && (
+                  <TouchableOpacity 
+                    style={[styles.primaryButton, { backgroundColor: '#F59E0B' }]}
+                    onPress={() => setTripStatus('BOARDING')}
+                  >
+                    <Text style={styles.primaryButtonText}>START BOARDING 🚌</Text>
+                  </TouchableOpacity>
+                )}
+
+                {tripStatus === 'BOARDING' && (
+                  <TouchableOpacity 
+                    style={[styles.primaryButton, { backgroundColor: '#0D9488' }]}
+                    onPress={() => setTripStatus('EN_ROUTE')}
+                  >
+                    <Text style={styles.primaryButtonText}>DEPART / START TRIP 🟢</Text>
+                  </TouchableOpacity>
+                )}
+
+                {tripStatus === 'EN_ROUTE' && (
+                  <TouchableOpacity 
+                    style={[styles.primaryButton, { backgroundColor: '#4F46E5' }]}
+                    onPress={() => setTripStatus('ARRIVED')}
+                  >
+                    <Text style={styles.primaryButtonText}>ARRIVED AT DESTINATION 📍</Text>
+                  </TouchableOpacity>
+                )}
+
+                {tripStatus === 'ARRIVED' && (
+                  <TouchableOpacity 
+                    style={[styles.primaryButton, { backgroundColor: '#9333EA' }]}
+                    onPress={() => setTripStatus('EMPTYING')}
+                  >
+                    <Text style={styles.primaryButtonText}>EMPTY BUS / PASSENGERS DEPARKED 🚪</Text>
+                  </TouchableOpacity>
+                )}
+
+                {tripStatus === 'EMPTYING' && (
+                  <TouchableOpacity 
+                    style={[styles.primaryButton, { backgroundColor: '#059669' }]}
+                    onPress={() => setTripStatus('COMPLETED')}
+                  >
+                    <Text style={styles.primaryButtonText}>COMPLETE TRIP & LOG REPORT ✅</Text>
+                  </TouchableOpacity>
+                )}
+
+                {tripStatus === 'COMPLETED' && (
+                  <Text style={styles.completedTripText}>✅ Trip Completed & Logged</Text>
+                )}
+              </View>
+            </View>
+
+            {/* Passenger Boarding Manifest Checklist */}
             <View style={styles.manifestCard}>
               <Text style={styles.cardTitle}>Confirmed Passenger Manifest</Text>
               
               {[
-                { name: 'Petrus Haimbodi', dept: 'Customs & Clearance', seats: 2 },
-                { name: 'Selma Shikongo', dept: 'Logistics Ops', seats: 4 }
+                { name: 'Petrus Haimbodi', dept: 'Customs & Clearance', seat: 'Seat 01' },
+                { name: 'Selma Shikongo', dept: 'Logistics Ops', seat: 'Seat 03' }
               ].map((p, i) => {
                 const isChecked = checkedPassengers[p.name];
                 return (
@@ -349,7 +422,7 @@ export default function App() {
 
                     <View style={styles.passengerInfo}>
                       <Text style={styles.passengerName}>{p.name}</Text>
-                      <Text style={styles.passengerDept}>{p.dept} • {p.seats} Seats</Text>
+                      <Text style={styles.passengerDept}>{p.dept} • {p.seat}</Text>
                     </View>
 
                     <Text style={styles.boardingStatus}>{isChecked ? 'ON BOARD' : 'WAITING'}</Text>
@@ -360,12 +433,12 @@ export default function App() {
           </View>
         )}
 
-        {/* SCREEN 3: POOL VEHICLES (Phase 2) */}
+        {/* SCREEN 3: POOL VEHICLES (Manager Fleet Booking) */}
         {activeTab === 'POOL' && (
           <View style={styles.section}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardBadge}>PHASE 2 • POOL VEHICLE FLEET</Text>
-              <Text style={styles.titleText}>Business Trip Reservations</Text>
+              <Text style={styles.cardBadge}>MANAGER FLEET BOOKING</Text>
+              <Text style={styles.titleText}>Business Trip Pool Vehicles</Text>
             </View>
 
             {/* Car Card 1 */}
@@ -380,12 +453,9 @@ export default function App() {
 
                 <TouchableOpacity 
                   style={styles.primaryButton}
-                  onPress={() => {
-                    setPoolRequested(true);
-                    Alert.alert('Request Sent', 'Pool vehicle request sent to Manager for approval!');
-                  }}
+                  onPress={() => setPoolModalVisible(true)}
                 >
-                  <Text style={styles.primaryButtonText}>Request Vehicle for Business Trip</Text>
+                  <Text style={styles.primaryButtonText}>Book Vehicle for Business Trip</Text>
                 </TouchableOpacity>
 
                 {poolRequested && (
@@ -491,11 +561,11 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-      {/* Booking Seat Modal */}
+      {/* Booking Shuttle Seat Modal */}
       <Modal visible={bookingModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Shuttle Seats</Text>
+            <Text style={styles.modalTitle}>Select Shuttle Seat</Text>
             <Text style={styles.subText}>08:00 HQ ➔ WMT Container Terminal</Text>
 
             <View style={styles.seatPickerRow}>
@@ -511,10 +581,64 @@ export default function App() {
             </View>
 
             <TouchableOpacity style={styles.primaryButton} onPress={handleBookShuttle}>
-              <Text style={styles.primaryButtonText}>Confirm ({seatsRequested} Seats)</Text>
+              <Text style={styles.primaryButtonText}>Confirm Seat #{seatsRequested}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.closeBtn} onPress={() => setBookingModalVisible(false)}>
+              <Text style={styles.closeBtnText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Manager Pool Fleet Vehicle Reservation Modal */}
+      <Modal visible={poolModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Book Pool Fleet Vehicle</Text>
+            <Text style={styles.subText}>Toyota Hilux Double Cab 4x4 (N 882-102 WB)</Text>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Business Purpose / Trip Reason</Text>
+              <TextInput
+                style={styles.inputField}
+                placeholder="e.g. Executive Client Visit to Swakopmund"
+                placeholderTextColor="#94A3B8"
+                value={poolPurpose}
+                onChangeText={setPoolPurpose}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Start Date & Departure Time</Text>
+              <TextInput
+                style={styles.inputField}
+                value={poolStartDateTime}
+                onChangeText={setPoolStartDateTime}
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>End Date & Return Time</Text>
+              <TextInput
+                style={styles.inputField}
+                value={poolEndDateTime}
+                onChangeText={setPoolEndDateTime}
+              />
+            </View>
+
+            <TouchableOpacity 
+              style={styles.primaryButton} 
+              onPress={() => {
+                setPoolRequested(true);
+                setPoolModalVisible(false);
+                Alert.alert('Vehicle Reserved', 'Pool vehicle reservation request created and locked in calendar!');
+              }}
+            >
+              <Text style={styles.primaryButtonText}>Submit Reservation</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setPoolModalVisible(false)}>
               <Text style={styles.closeBtnText}>Cancel</Text>
             </TouchableOpacity>
           </View>
@@ -1126,5 +1250,83 @@ const styles = StyleSheet.create({
     color: '#F87171',
     fontSize: 10,
     fontWeight: 'bold',
+  },
+  offerCard: {
+    backgroundColor: '#FEF3C7',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1.5,
+    borderColor: '#F59E0B',
+    marginBottom: 14,
+  },
+  offerHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  offerBadge: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#92400E',
+    backgroundColor: '#FDE68A',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  offerTime: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#B45309',
+  },
+  offerRoute: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#78350F',
+  },
+  offerSub: {
+    fontSize: 11,
+    color: '#B45309',
+    marginTop: 2,
+    marginBottom: 10,
+  },
+  tripControlCard: {
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 14,
+  },
+  tripStatusHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  statusPill: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#FFF',
+    backgroundColor: NAVY,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  tripRouteText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: NAVY,
+    marginBottom: 12,
+  },
+  actionButtonContainer: {
+    marginTop: 4,
+  },
+  completedTripText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#059669',
+    textAlign: 'center',
+    paddingVertical: 8,
   },
 });
