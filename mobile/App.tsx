@@ -31,7 +31,7 @@ export default function App() {
     avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=200',
   });
 
-  const [activeTab, setActiveTab] = useState<'BUS' | 'DRIVER' | 'POOL' | 'APPROVALS' | 'INSPECTION'>('BUS');
+  const [activeTab, setActiveTab] = useState<'RIDER' | 'DRIVER' | 'MANAGER' | 'INSPECTOR' | 'ADMIN'>('RIDER');
   const [role, setRole] = useState<'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN'>('EMPLOYEE');
 
   // State models
@@ -229,10 +229,10 @@ export default function App() {
               const nextRole = roles[nextIdx];
               setRole(nextRole);
 
-              if (nextRole === 'EMPLOYEE') setActiveTab('BUS');
+              if (nextRole === 'EMPLOYEE') setActiveTab('RIDER');
               else if (nextRole === 'DRIVER') setActiveTab('DRIVER');
-              else if (nextRole === 'MANAGER') setActiveTab('POOL');
-              else if (nextRole === 'FLEET_ADMIN') setActiveTab('INSPECTION');
+              else if (nextRole === 'MANAGER') setActiveTab('MANAGER');
+              else if (nextRole === 'FLEET_ADMIN') setActiveTab('INSPECTOR');
             }}
           >
             <Text style={styles.rolePillText}>Role: {role}</Text>
@@ -253,11 +253,11 @@ export default function App() {
       {/* Main Native Screen Content */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
 
-        {/* SCREEN 1: BUS SHUTTLE (Phase 1) */}
-        {activeTab === 'BUS' && (
+        {/* SCREEN 1: RIDER PORTAL */}
+        {activeTab === 'RIDER' && (
           <View style={styles.section}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardBadge}>PHASE 1 • COMPANY BUS SHUTTLE</Text>
+              <Text style={styles.cardBadge}>RIDER PORTAL • COMPANY SHUTTLE</Text>
               <Text style={styles.titleText}>HQ ➔ WMT Container Terminal</Text>
               <Text style={styles.subText}>Fixed departure window: 08:00 AM</Text>
             </View>
@@ -304,11 +304,11 @@ export default function App() {
           </View>
         )}
 
-        {/* SCREEN 2: DRIVER DISPATCH CONSOLE */}
+        {/* SCREEN 2: DRIVER CONSOLE */}
         {activeTab === 'DRIVER' && (
           <View style={styles.section}>
             <View style={styles.driverHeader}>
-              <Text style={styles.driverTitle}>Driver Trip Console</Text>
+              <Text style={styles.driverTitle}>Driver Console</Text>
               <Text style={styles.driverSub}>Driver: Johannes Nangolo • Coaster Bus (N 142-991 WB)</Text>
             </View>
 
@@ -439,11 +439,11 @@ export default function App() {
           </View>
         )}
 
-        {/* SCREEN 3: POOL VEHICLES (Manager Fleet Booking) */}
-        {activeTab === 'POOL' && (
+        {/* SCREEN 3: MANAGER HUB */}
+        {activeTab === 'MANAGER' && (
           <View style={styles.section}>
             <View style={styles.cardHeader}>
-              <Text style={styles.cardBadge}>MANAGER FLEET BOOKING</Text>
+              <Text style={styles.cardBadge}>MANAGER HUB • FLEET & APPROVALS</Text>
               <Text style={styles.titleText}>Business Trip Pool Vehicles</Text>
             </View>
 
@@ -477,18 +477,12 @@ export default function App() {
                 )}
               </View>
             </View>
-          </View>
-        )}
 
-        {/* SCREEN 4: MANAGER APPROVAL INBOX */}
-        {activeTab === 'APPROVALS' && (
-          <View style={styles.section}>
-            <Text style={styles.titleText}>Manager Approval Inbox</Text>
-            
-            <View style={styles.myBookingsCard}>
-              <Text style={styles.cardTitle}>Pending Pool Vehicle Request</Text>
+            {/* Manager Approvals Section */}
+            <View style={[styles.myBookingsCard, { marginTop: 14 }]}>
+              <Text style={styles.cardTitle}>Pending Manager Approvals</Text>
               <Text style={styles.subText}>Requester: Petrus Haimbodi (Customs & Clearance)</Text>
-              <Text style={styles.subText}>Purpose: On-site cargo inspection at Port of Walvis Bay</Text>
+              <Text style={styles.subText}>Purpose: Cargo inspection at Port of Walvis Bay</Text>
               <Text style={styles.subText}>Vehicle: Toyota Hilux (N 882-102 WB)</Text>
 
               <View style={styles.buttonRow}>
@@ -513,10 +507,13 @@ export default function App() {
           </View>
         )}
 
-        {/* SCREEN 5: FLEET ADMIN RETURN INSPECTION */}
-        {activeTab === 'INSPECTION' && (
+        {/* SCREEN 4: INSPECTOR GATE */}
+        {activeTab === 'INSPECTOR' && (
           <View style={styles.section}>
-            <Text style={styles.titleText}>Fleet Return Inspection</Text>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardBadge}>INSPECTOR GATE • VEHICLE RETURN CLEARANCE</Text>
+              <Text style={styles.titleText}>Return Inspection Protocol</Text>
+            </View>
             
             <View style={styles.myBookingsCard}>
               <Text style={styles.cardTitle}>Clearance Protocol • N 882-102 WB</Text>
@@ -537,28 +534,58 @@ export default function App() {
           </View>
         )}
 
+        {/* SCREEN 5: ADMIN & BUSINESS RULES */}
+        {activeTab === 'ADMIN' && (
+          <View style={styles.section}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.cardBadge}>ADMIN PORTAL • SYSTEM CONTROL</Text>
+              <Text style={styles.titleText}>Business Rules & Transport Config</Text>
+            </View>
+
+            <View style={styles.myBookingsCard}>
+              <Text style={styles.cardTitle}>Live Fleet Rules</Text>
+              <Text style={styles.subText}>• Cutoff Window: 12 Hours Notice</Text>
+              <Text style={styles.subText}>• Auto-Approve Shuttle Bookings: ENABLED</Text>
+              <Text style={styles.subText}>• Max Seats Per Employee: 4 Seats</Text>
+              <Text style={styles.subText}>• Driver Acceptance Timeout: 15 Mins</Text>
+
+              <TouchableOpacity 
+                style={[styles.primaryButton, { marginTop: 12 }]}
+                onPress={() => Alert.alert('Rules Saved', 'Business rules updated across system!')}
+              >
+                <Text style={styles.primaryButtonText}>Save Rule Configurations</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
+
       </ScrollView>
 
-      {/* Mobile Bottom Tab Bar (Native Mobile Navigation) */}
+      {/* Mobile Bottom Tab Bar (Expo Go Navigation Bar) */}
       <View style={styles.tabBar}>
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('BUS')}>
-          <Text style={[styles.tabIcon, activeTab === 'BUS' && styles.tabActive]}>🚌</Text>
-          <Text style={[styles.tabLabel, activeTab === 'BUS' && styles.tabActive]}>Shuttle</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('POOL')}>
-          <Text style={[styles.tabIcon, activeTab === 'POOL' && styles.tabActive]}>🚗</Text>
-          <Text style={[styles.tabLabel, activeTab === 'POOL' && styles.tabActive]}>Pool Fleet</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('APPROVALS')}>
-          <Text style={[styles.tabIcon, activeTab === 'APPROVALS' && styles.tabActive]}>☑️</Text>
-          <Text style={[styles.tabLabel, activeTab === 'APPROVALS' && styles.tabActive]}>Approvals</Text>
+        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('RIDER')}>
+          <Text style={[styles.tabIcon, activeTab === 'RIDER' && styles.tabActive]}>🧑‍💼</Text>
+          <Text style={[styles.tabLabel, activeTab === 'RIDER' && styles.tabActive]}>Rider Portal</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('DRIVER')}>
           <Text style={[styles.tabIcon, activeTab === 'DRIVER' && styles.tabActive]}>📋</Text>
-          <Text style={[styles.tabLabel, activeTab === 'DRIVER' && styles.tabActive]}>Driver</Text>
+          <Text style={[styles.tabLabel, activeTab === 'DRIVER' && styles.tabActive]}>Driver Console</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('MANAGER')}>
+          <Text style={[styles.tabIcon, activeTab === 'MANAGER' && styles.tabActive]}>👔</Text>
+          <Text style={[styles.tabLabel, activeTab === 'MANAGER' && styles.tabActive]}>Manager Hub</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('INSPECTOR')}>
+          <Text style={[styles.tabIcon, activeTab === 'INSPECTOR' && styles.tabActive]}>🛡️</Text>
+          <Text style={[styles.tabLabel, activeTab === 'INSPECTOR' && styles.tabActive]}>Inspector Gate</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('ADMIN')}>
+          <Text style={[styles.tabIcon, activeTab === 'ADMIN' && styles.tabActive]}>⚙️</Text>
+          <Text style={[styles.tabLabel, activeTab === 'ADMIN' && styles.tabActive]}>Admin & Rules</Text>
         </TouchableOpacity>
       </View>
 
