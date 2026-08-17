@@ -209,7 +209,7 @@ export default function App() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={NAVY} />
 
-      {/* Mobile Top Header */}
+      {/* Mobile Header Bar */}
       <View style={styles.header}>
         <View style={styles.brandRow}>
           <View style={styles.logoBox}>
@@ -217,38 +217,62 @@ export default function App() {
           </View>
           <View>
             <Text style={styles.headerTitle}>AGL Transport Hub</Text>
-            <Text style={styles.headerSub}>🔒 Microsoft Entra ID • Walvis Bay</Text>
+            <Text style={styles.headerSub}>🔒 Microsoft Entra ID • {activeUser.name}</Text>
           </View>
         </View>
 
-        {/* Emulator Role Switcher Pill & Sign Out */}
-        <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center' }}>
-          <TouchableOpacity 
-            style={styles.rolePill}
-            onPress={() => {
-              const roles: Array<'EMPLOYEE' | 'DRIVER' | 'MANAGER' | 'FLEET_ADMIN'> = ['EMPLOYEE', 'DRIVER', 'MANAGER', 'FLEET_ADMIN'];
-              const nextIdx = (roles.indexOf(role) + 1) % roles.length;
-              const nextRole = roles[nextIdx];
-              setRole(nextRole);
+        <TouchableOpacity 
+          style={styles.logoutBtn}
+          onPress={() => {
+            setIsAuthenticated(false);
+            Alert.alert('Signed Out', 'You have been signed out of your Microsoft Entra ID session.');
+          }}
+        >
+          <Text style={styles.logoutBtnText}>Sign Out</Text>
+        </TouchableOpacity>
+      </View>
 
-              if (nextRole === 'EMPLOYEE') setActiveTab('SHUTTLE');
-              else if (nextRole === 'MANAGER') setActiveTab('POOL');
-              else if (nextRole === 'DRIVER') setActiveTab('DRIVER');
+      {/* Dedicated Mobile Persona Switcher Bar */}
+      <View style={styles.personaBar}>
+        <Text style={styles.personaBarLabel}>TEST PERSONA:</Text>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+          <TouchableOpacity 
+            style={[styles.personaPill, role === 'EMPLOYEE' && styles.personaPillActive]}
+            onPress={() => {
+              handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE');
+              setActiveTab('SHUTTLE');
             }}
           >
-            <Text style={styles.rolePillText}>Role: {role}</Text>
+            <Text style={[styles.personaPillText, role === 'EMPLOYEE' && styles.personaPillTextActive]}>
+              🧑‍💼 Rider (Petrus)
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
-            style={styles.logoutBtn}
+            style={[styles.personaPill, role === 'MANAGER' && styles.personaPillActive]}
             onPress={() => {
-              setIsAuthenticated(false);
-              Alert.alert('Signed Out', 'You have been signed out of your Microsoft Entra ID session.');
+              handleMobileLogin('Klaus Schneider', 'manager.logistics@aglgroup.com', 'MANAGER');
+              setActiveTab('POOL');
             }}
           >
-            <Text style={styles.logoutBtnText}>Sign Out</Text>
+            <Text style={[styles.personaPillText, role === 'MANAGER' && styles.personaPillTextActive]}>
+              👔 Manager (Klaus)
+            </Text>
           </TouchableOpacity>
-        </View>
+
+          <TouchableOpacity 
+            style={[styles.personaPill, role === 'DRIVER' && styles.personaPillActive]}
+            onPress={() => {
+              handleMobileLogin('Johannes Nangolo', 'driver.bus1@aglgroup.com', 'DRIVER');
+              setActiveTab('DRIVER');
+            }}
+          >
+            <Text style={[styles.personaPillText, role === 'DRIVER' && styles.personaPillTextActive]}>
+              🚌 Driver (Johannes)
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
 
       {/* Main Native Screen Content */}
@@ -742,21 +766,37 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-  headerSub: {
+  personaBar: {
+    backgroundColor: '#1E293B',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#334155',
+  },
+  personaBarLabel: {
+    fontSize: 9,
+    fontWeight: '900',
     color: GOLD,
-    fontSize: 10,
-    fontWeight: '600',
   },
-  rolePill: {
-    backgroundColor: '#25467A',
+  personaPill: {
+    backgroundColor: '#334155',
     paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingVertical: 5,
+    borderRadius: 14,
   },
-  rolePillText: {
-    color: '#FFF',
+  personaPillActive: {
+    backgroundColor: GOLD,
+  },
+  personaPillText: {
     fontSize: 10,
     fontWeight: 'bold',
+    color: '#94A3B8',
+  },
+  personaPillTextActive: {
+    color: NAVY,
   },
   scrollContent: {
     backgroundColor: GRAY_BG,
