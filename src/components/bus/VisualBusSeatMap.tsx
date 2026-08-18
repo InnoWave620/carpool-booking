@@ -3,7 +3,7 @@
 import React from 'react';
 import { BusTrip, BusBooking } from '@/types';
 import { generateBusSeatLayout, SeatLayoutInfo } from '@/lib/services/bookingConcurrency';
-import { User, Lock, CheckCircle } from 'lucide-react';
+import { User, Lock, CheckCircle, Bus, DoorClosed } from 'lucide-react';
 
 interface VisualBusSeatMapProps {
   trip: BusTrip;
@@ -52,14 +52,14 @@ export const VisualBusSeatMap: React.FC<VisualBusSeatMapProps> = ({
       {/* Driver Cockpit Graphic Area */}
       <div className="flex items-center justify-between px-6 py-3 bg-slate-950/80 rounded-2xl border border-slate-800 mb-6">
         <div className="flex items-center space-x-2">
-          <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-[10px] font-bold">
-            🕹️
+          <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-bold">
+            <Bus className="w-3.5 h-3.5 text-slate-300" />
           </div>
           <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Driver Cabin</span>
         </div>
 
-        <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg">
-          🚪 Entry Door
+        <div className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg flex items-center gap-1.5">
+          <DoorClosed className="w-3 h-3 text-emerald-400" /> Entry Door
         </div>
       </div>
 

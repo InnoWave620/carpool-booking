@@ -58,9 +58,11 @@ export const Navbar: React.FC<NavbarProps> = ({ onUserChange }) => {
         
         {/* Left: Branding & Site Badge */}
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#EED58E] to-amber-200 flex items-center justify-center text-[#1C355E] font-extrabold text-xl shadow-inner">
-            AGL
-          </div>
+          <img 
+            src="/agloggo.png" 
+            alt="AGL Logo" 
+            className="w-10 h-10 rounded-xl object-contain bg-[#1C355E] p-0.5 border border-[#EED58E]/40 shadow-sm" 
+          />
           <div>
             <div className="flex items-center space-x-2">
               <h1 className="text-lg font-bold tracking-tight text-white">Transport Hub</h1>

@@ -31,12 +31,12 @@ export function getVehicleStatusBadge(status: string): { label: string; badgeCla
     case 'AVAILABLE':
       return { label: 'Available', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300' };
     case 'RESERVED':
-      return { label: 'Reserved / Booked', badgeClass: 'bg-blue-100 text-blue-800 border-blue-300' };
+      return { label: 'Reserved / Booked', badgeClass: 'bg-[#1C355E]/10 text-[#1C355E] border-[#1C355E]/30' };
     case 'IN_USE':
       return { label: 'In Use', badgeClass: 'bg-amber-500 text-white font-extrabold' };
     case 'RETURNED':
     case 'INSPECTION_REQUIRED':
-      return { label: 'Returned (Pending Inspection)', badgeClass: 'bg-purple-100 text-purple-800 border-purple-300 font-extrabold animate-pulse' };
+      return { label: 'Returned (Pending Inspection)', badgeClass: 'bg-amber-100 text-amber-900 border-amber-300 font-extrabold animate-pulse' };
     case 'UNDER_MAINTENANCE':
     case 'INSPECTION_FAILED':
       return { label: 'Under Maintenance', badgeClass: 'bg-rose-100 text-rose-800 border-rose-300' };

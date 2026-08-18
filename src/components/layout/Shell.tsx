@@ -175,7 +175,7 @@ export const Shell: React.FC<ShellProps> = ({ children }) => {
           {isRestricted ? (
             <div className="bg-white border border-rose-200 rounded-3xl p-8 max-w-lg mx-auto my-12 shadow-xl text-center space-y-4">
               <div className="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center mx-auto text-2xl font-black">
-                🔒
+                <ShieldCheck className="w-8 h-8 text-rose-600" />
               </div>
               <h2 className="text-xl font-black text-slate-900">Access Restricted</h2>
               <p className="text-sm text-slate-600">

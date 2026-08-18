@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Bus, Calendar, MapPin, CheckCircle2, Clock, ShieldCheck } from 'lucide-react';
+import { Bus, Calendar, MapPin, CheckCircle2, Clock, ShieldCheck, X } from 'lucide-react';
 import { INITIAL_BUS_TRIPS, INITIAL_BUS_BOOKINGS, INITIAL_VEHICLES } from '@/lib/store';
 import { getActiveUser } from '@/lib/auth';
 import { Employee, BusTrip, BusBooking } from '@/types';
@@ -79,7 +79,7 @@ export default function EmployeeDashboard() {
         const newBooking = await res.json();
         setBookings(prev => [newBooking, ...prev]);
         setTrips(prev => prev.map(t => t.id === selectedTrip.id ? { ...t, availableSeats: Math.max(0, t.availableSeats - 1) } : t));
-        setBookingMessage(`🎉 Seat #${selectedSeat} successfully booked in live database!`);
+        setBookingMessage(`Seat #${selectedSeat} successfully booked in live database!`);
         setTimeout(() => {
           setSelectedTrip(null);
           setSelectedSeat(null);
@@ -88,10 +88,10 @@ export default function EmployeeDashboard() {
         }, 1500);
       } else {
         const err = await res.json();
-        setBookingMessage(`❌ ${err.error || 'Failed to book seat'}`);
+        setBookingMessage(err.error || 'Failed to book seat');
       }
     } catch (err: any) {
-      setBookingMessage(`❌ ${err.message}`);
+      setBookingMessage(err.message);
     }
   };
 
@@ -105,7 +105,7 @@ export default function EmployeeDashboard() {
             <span>AGL Employee Rider Portal • Walvis Bay</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white">
-            Hello, {user.firstName}! 👋
+            Hello, {user.firstName}!
           </h1>
           <p className="text-xs sm:text-sm text-slate-200 mt-1 leading-relaxed">
             Reserve shuttle bus seats with visual seat selection and track active trips in real time.
@@ -231,8 +231,8 @@ export default function EmployeeDashboard() {
                 <h3 className="text-lg font-black text-[#1C355E]">Select Your Seat</h3>
                 <p className="text-xs text-slate-500 font-medium">Shuttle Departure: {new Date(selectedTrip.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
               </div>
-              <button onClick={() => setSelectedTrip(null)} className="text-slate-400 hover:text-slate-700 font-bold text-xs">
-                ✕ Close
+              <button onClick={() => setSelectedTrip(null)} className="text-slate-400 hover:text-slate-700 font-bold text-xs flex items-center gap-1">
+                <X className="w-4 h-4" /> Close
               </button>
             </div>
 

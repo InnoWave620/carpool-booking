@@ -1,5 +1,30 @@
 import React, { useState } from 'react';
 import { 
+  Lock, 
+  Shield, 
+  User, 
+  Briefcase, 
+  Bus, 
+  ShieldCheck, 
+  Settings, 
+  Check, 
+  X, 
+  MapPin, 
+  Zap, 
+  Clock, 
+  Play, 
+  CheckCircle2, 
+  XCircle, 
+  AlertTriangle, 
+  Calendar, 
+  Save, 
+  LayoutDashboard, 
+  ClipboardList, 
+  Car, 
+  DoorOpen
+} from 'lucide-react-native';
+
+import { 
   StyleSheet, 
   Text, 
   View, 
@@ -136,12 +161,16 @@ export default function App() {
           {/* Brand Banner Header */}
           <View style={styles.authHeader}>
             <View style={styles.authLogoBox}>
-              <Text style={styles.authLogoText}>AGL</Text>
+              <Image 
+                source={require('./assets/agloggo.png')} 
+                style={styles.authLogoImage} 
+                resizeMode="contain" 
+              />
             </View>
             <Text style={styles.authTitle}>AGL Transport Hub</Text>
             <Text style={styles.authSubtitle}>Namibia • Walvis Bay Mobile</Text>
             <View style={styles.authBadge}>
-              <Text style={styles.authBadgeText}>🔒 Microsoft Entra ID Protected</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><Lock size={12} color={GOLD} /><Text style={styles.authBadgeText}>Microsoft Entra ID Protected</Text></View>
             </View>
           </View>
 
@@ -219,31 +248,31 @@ export default function App() {
                 style={styles.personaChip}
                 onPress={() => handleMobileLogin('Petrus Haimbodi', 'petrus.haimbodi@aglgroup.com', 'EMPLOYEE', 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&q=80&w=200')}
               >
-                <Text style={styles.personaChipText}>🧑‍💼 Petrus (Rider)</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><User size={13} color="#FFF" /><Text style={styles.personaChipText}>Petrus (Rider)</Text></View>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.personaChip}
                 onPress={() => handleMobileLogin('Klaus Schneider', 'manager.logistics@aglgroup.com', 'MANAGER', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200')}
               >
-                <Text style={styles.personaChipText}>👔 Klaus (Manager)</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><Briefcase size={13} color="#FFF" /><Text style={styles.personaChipText}>Klaus (Manager)</Text></View>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.personaChip}
                 onPress={() => handleMobileLogin('Johannes Nangolo', 'driver.bus1@aglgroup.com', 'DRIVER', 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200')}
               >
-                <Text style={styles.personaChipText}>🚌 Johannes (Driver)</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><Bus size={13} color="#FFF" /><Text style={styles.personaChipText}>Johannes (Driver)</Text></View>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.personaChip}
                 onPress={() => handleMobileLogin('Maria Amadhila', 'fleet.admin@aglgroup.com', 'FLEET_ADMIN', 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=200')}
               >
-                <Text style={styles.personaChipText}>🛡️ Maria (Inspector)</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><ShieldCheck size={13} color="#FFF" /><Text style={styles.personaChipText}>Maria (Inspector)</Text></View>
               </TouchableOpacity>
               <TouchableOpacity 
                 style={styles.personaChip}
                 onPress={() => handleMobileLogin('Senzo Shinga', 'admin.namibia@aglgroup.com', 'SUPER_ADMIN', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=200')}
               >
-                <Text style={styles.personaChipText}>⚙️ Senzo (Admin)</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><Settings size={13} color="#FFF" /><Text style={styles.personaChipText}>Senzo (Admin)</Text></View>
               </TouchableOpacity>
             </View>
           </View>
@@ -260,11 +289,15 @@ export default function App() {
       <View style={styles.header}>
         <View style={styles.brandRow}>
           <View style={styles.logoBox}>
-            <Text style={styles.logoText}>AGL</Text>
+            <Image 
+              source={require('./assets/agloggo.png')} 
+              style={styles.logoImage} 
+              resizeMode="contain" 
+            />
           </View>
           <View>
             <Text style={styles.headerTitle}>AGL Transport Hub</Text>
-            <Text style={styles.headerSub}>🔒 Microsoft Entra ID • Walvis Bay</Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><Lock size={10} color={GOLD} /><Text style={styles.headerSub}>Microsoft Entra ID • Walvis Bay</Text></View>
           </View>
         </View>
 
@@ -308,7 +341,7 @@ export default function App() {
                 <Text style={styles.itemNameText}>Petrus Haimbodi</Text>
                 <Text style={styles.itemRoleText}>EMPLOYEE • Rider</Text>
               </View>
-              {activeUser.name === 'Petrus Haimbodi' && <Text style={styles.checkIcon}>✓</Text>}
+              {activeUser.name === 'Petrus Haimbodi' && <Check size={16} color={TURQUOISE} />}
             </TouchableOpacity>
 
             {/* Persona 2: Manager (Klaus) */}
@@ -325,7 +358,7 @@ export default function App() {
                 <Text style={styles.itemNameText}>Klaus Schneider</Text>
                 <Text style={styles.itemRoleText}>MANAGER • Logistics Lead</Text>
               </View>
-              {activeUser.name === 'Klaus Schneider' && <Text style={styles.checkIcon}>✓</Text>}
+              {activeUser.name === 'Klaus Schneider' && <Check size={16} color={TURQUOISE} />}
             </TouchableOpacity>
 
             {/* Persona 3: Driver (Johannes) */}
@@ -342,7 +375,7 @@ export default function App() {
                 <Text style={styles.itemNameText}>Johannes Nangolo</Text>
                 <Text style={styles.itemRoleText}>DRIVER • Shuttle Bus 01</Text>
               </View>
-              {activeUser.name === 'Johannes Nangolo' && <Text style={styles.checkIcon}>✓</Text>}
+              {activeUser.name === 'Johannes Nangolo' && <Check size={16} color={TURQUOISE} />}
             </TouchableOpacity>
 
             {/* Persona 4: Inspector (Maria) */}
@@ -359,7 +392,7 @@ export default function App() {
                 <Text style={styles.itemNameText}>Maria Amadhila</Text>
                 <Text style={styles.itemRoleText}>FLEET ADMIN • Inspector</Text>
               </View>
-              {activeUser.name === 'Maria Amadhila' && <Text style={styles.checkIcon}>✓</Text>}
+              {activeUser.name === 'Maria Amadhila' && <Check size={16} color={TURQUOISE} />}
             </TouchableOpacity>
 
             {/* Persona 5: Admin (Senzo) */}
@@ -376,7 +409,7 @@ export default function App() {
                 <Text style={styles.itemNameText}>Senzo Shinga</Text>
                 <Text style={styles.itemRoleText}>SUPER ADMIN • Operations</Text>
               </View>
-              {activeUser.name === 'Senzo Shinga' && <Text style={styles.checkIcon}>✓</Text>}
+              {activeUser.name === 'Senzo Shinga' && <Check size={16} color={TURQUOISE} />}
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -402,9 +435,9 @@ export default function App() {
             {/* Dark Navy Hero Welcome Banner */}
             <View style={styles.heroCard}>
               <View style={styles.heroBadgeRow}>
-                <Text style={styles.heroBadge}>📍 AGL Employee Rider Portal • Walvis Bay</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><MapPin size={12} color={TURQUOISE} /><Text style={styles.heroBadge}>AGL Employee Rider Portal • Walvis Bay</Text></View>
               </View>
-              <Text style={styles.heroGreeting}>Hello, {activeUser.name.split(' ')[0]}! 👋</Text>
+              <Text style={styles.heroGreeting}>Hello, {activeUser.name.split(' ')[0]}!</Text>
               <Text style={styles.heroSubText}>
                 Reserve shuttle bus seats with visual seat selection and track active trips in real time.
               </Text>
@@ -413,7 +446,7 @@ export default function App() {
             {/* Live Current Trips Banner */}
             <View style={styles.liveTripsCard}>
               <View style={styles.liveTripsTitleRow}>
-                <Text style={styles.liveSpinIcon}>⚡</Text>
+                <Zap size={14} color={GOLD} />
                 <Text style={styles.liveTripsTitle}>LIVE TRIPS IN PROGRESS</Text>
               </View>
 
@@ -481,7 +514,7 @@ export default function App() {
                     style={styles.selectSeatBtn}
                     onPress={() => setBookingModalVisible(true)}
                   >
-                    <Text style={styles.selectSeatBtnText}>🚌 Select Seat & Book</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Bus size={14} color={NAVY} /><Text style={styles.selectSeatBtnText}>Select Seat & Book</Text></View>
                   </TouchableOpacity>
                 </View>
 
@@ -504,7 +537,7 @@ export default function App() {
                     style={styles.selectSeatBtn}
                     onPress={() => setBookingModalVisible(true)}
                   >
-                    <Text style={styles.selectSeatBtnText}>🚌 Select Seat & Book</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Bus size={14} color={NAVY} /><Text style={styles.selectSeatBtnText}>Select Seat & Book</Text></View>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -629,31 +662,31 @@ export default function App() {
               <View style={styles.actionButtonContainer}>
                 {tripStatus === 'SCHEDULED' && (
                   <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#F59E0B' }]} onPress={() => setTripStatus('BOARDING')}>
-                    <Text style={styles.primaryButtonText}>START BOARDING 🚌</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Bus size={14} color="#FFF" /><Text style={styles.primaryButtonText}>START BOARDING</Text></View>
                   </TouchableOpacity>
                 )}
                 {tripStatus === 'BOARDING' && (
                   <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#0D9488' }]} onPress={() => setTripStatus('EN_ROUTE')}>
-                    <Text style={styles.primaryButtonText}>DEPART / START TRIP 🟢</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Play size={14} color="#FFF" /><Text style={styles.primaryButtonText}>DEPART / START TRIP</Text></View>
                   </TouchableOpacity>
                 )}
                 {tripStatus === 'EN_ROUTE' && (
-                  <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#4F46E5' }]} onPress={() => setTripStatus('ARRIVED')}>
-                    <Text style={styles.primaryButtonText}>ARRIVED AT DESTINATION 📍</Text>
+                  <TouchableOpacity style={[styles.primaryButton, { backgroundColor: NAVY }]} onPress={() => setTripStatus('ARRIVED')}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><MapPin size={14} color="#FFF" /><Text style={styles.primaryButtonText}>ARRIVED AT DESTINATION</Text></View>
                   </TouchableOpacity>
                 )}
                 {tripStatus === 'ARRIVED' && (
-                  <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#9333EA' }]} onPress={() => setTripStatus('EMPTYING')}>
-                    <Text style={styles.primaryButtonText}>EMPTY BUS / PASSENGERS DEPARKED 🚪</Text>
+                  <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#0F172A' }]} onPress={() => setTripStatus('EMPTYING')}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><DoorOpen size={14} color="#FFF" /><Text style={styles.primaryButtonText}>EMPTY BUS / PASSENGERS DEPARKED</Text></View>
                   </TouchableOpacity>
                 )}
                 {tripStatus === 'EMPTYING' && (
                   <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#059669' }]} onPress={() => setTripStatus('COMPLETED')}>
-                    <Text style={styles.primaryButtonText}>COMPLETE TRIP & LOG REPORT ✅</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><CheckCircle2 size={14} color="#FFF" /><Text style={styles.primaryButtonText}>COMPLETE TRIP & LOG REPORT</Text></View>
                   </TouchableOpacity>
                 )}
                 {tripStatus === 'COMPLETED' && (
-                  <Text style={styles.completedTripText}>✅ Trip Completed & Logged</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><CheckCircle2 size={14} color="#10B981" /><Text style={styles.completedTripText}>Trip Completed & Logged</Text></View>
                 )}
               </View>
 
@@ -671,7 +704,7 @@ export default function App() {
                         style={[styles.checkbox, isChecked && styles.checkboxActive]}
                         onPress={() => setCheckedPassengers(prev => ({ ...prev, [p.name]: !prev[p.name] }))}
                       >
-                        <Text style={styles.checkboxCheck}>{isChecked ? '✓' : ''}</Text>
+                        {isChecked ? <Check size={12} color="#FFF" /> : null}
                       </TouchableOpacity>
                       <View style={styles.passengerInfo}>
                         <Text style={styles.passengerName}>{p.name}</Text>
@@ -692,7 +725,7 @@ export default function App() {
               </View>
               <Text style={styles.tripRouteText}>WMT Container Terminal ➔ AGL HQ</Text>
               <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#F59E0B', marginTop: 10 }]} onPress={() => Alert.alert('Trip Started', 'Trip 2 boarding started.')}>
-                <Text style={styles.primaryButtonText}>START BOARDING 🚌</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Bus size={14} color="#FFF" /><Text style={styles.primaryButtonText}>START BOARDING</Text></View>
               </TouchableOpacity>
               <View style={[styles.manifestCard, { marginTop: 10 }]}>
                 <Text style={styles.manifestTitle}>DIGITAL PASSENGER MANIFEST CHECK-IN (0 BOOKINGS)</Text>
@@ -708,7 +741,7 @@ export default function App() {
               </View>
               <Text style={styles.tripRouteText}>AGL HQ ➔ Namibia Customs & Excise Office</Text>
               <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#F59E0B', marginTop: 10 }]} onPress={() => Alert.alert('Trip Started', 'Trip 3 boarding started.')}>
-                <Text style={styles.primaryButtonText}>START BOARDING 🚌</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Bus size={14} color="#FFF" /><Text style={styles.primaryButtonText}>START BOARDING</Text></View>
               </TouchableOpacity>
               <View style={[styles.manifestCard, { marginTop: 10 }]}>
                 <Text style={styles.manifestTitle}>DIGITAL PASSENGER MANIFEST CHECK-IN (0 BOOKINGS)</Text>
@@ -724,7 +757,7 @@ export default function App() {
               </View>
               <Text style={styles.tripRouteText}>Namibia Customs Office ➔ AGL HQ</Text>
               <TouchableOpacity style={[styles.primaryButton, { backgroundColor: '#F59E0B', marginTop: 10 }]} onPress={() => Alert.alert('Trip Started', 'Trip 4 boarding started.')}>
-                <Text style={styles.primaryButtonText}>START BOARDING 🚌</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Bus size={14} color="#FFF" /><Text style={styles.primaryButtonText}>START BOARDING</Text></View>
               </TouchableOpacity>
               <View style={[styles.manifestCard, { marginTop: 10 }]}>
                 <Text style={styles.manifestTitle}>DIGITAL PASSENGER MANIFEST CHECK-IN (0 BOOKINGS)</Text>
@@ -748,7 +781,7 @@ export default function App() {
         {activeTab === 'MANAGER' && (
           <View style={styles.section}>
             {/* Header Banner */}
-            <View style={[styles.driverHeroBanner, { backgroundColor: '#312E81' }]}>
+            <View style={styles.driverHeroBanner}>
               <Text style={styles.driverHeroBadge}>MANAGER CONTROL HUB • WALVIS BAY FLEET</Text>
               <Text style={styles.driverTitle}>Manager Console: Klaus Schneider</Text>
               <Text style={styles.driverSub}>Approve team transport requests & reserve company pool vehicles.</Text>
@@ -760,17 +793,17 @@ export default function App() {
               <View style={styles.offerCard}>
                 <View style={styles.offerHeaderRow}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                    <View style={[styles.pulseDot, { backgroundColor: '#6366F1' }]} />
-                    <Text style={[styles.offerBadge, { color: '#3730A3', backgroundColor: '#E0E7FF' }]}>PENDING MANAGER APPROVAL</Text>
+                    <View style={[styles.pulseDot, { backgroundColor: GOLD }]} />
+                    <Text style={[styles.offerBadge, { color: NAVY, backgroundColor: 'rgba(238, 213, 142, 0.2)', borderColor: GOLD, borderWidth: 1 }]}>PENDING MANAGER APPROVAL</Text>
                   </View>
                   <Text style={styles.offerTime}>pool-req-1</Text>
                 </View>
 
-                <View style={[styles.offerDetailsGrid, { borderColor: '#C7D2FE' }]}>
+                <View style={styles.offerDetailsGrid}>
                   <View>
                     <Text style={styles.offerDetailLabel}>REQUESTER</Text>
-                    <Text style={[styles.offerRoute, { color: '#1E1B4B' }]}>Petrus Haimbodi</Text>
-                    <Text style={[styles.offerSub, { color: '#6366F1', marginTop: 0 }]}>Customs & Clearance Dept.</Text>
+                    <Text style={styles.offerRoute}>Petrus Haimbodi</Text>
+                    <Text style={[styles.offerSub, { color: '#64748B', marginTop: 0 }]}>Customs & Clearance Dept.</Text>
                   </View>
                   <View>
                     <Text style={styles.offerDetailLabel}>PURPOSE</Text>
@@ -778,8 +811,8 @@ export default function App() {
                   </View>
                   <View>
                     <Text style={styles.offerDetailLabel}>VEHICLE REQUESTED</Text>
-                    <Text style={[styles.offerRoute, { color: '#1E1B4B' }]}>Toyota Hilux 4x4</Text>
-                    <Text style={[styles.offerSub, { color: '#6366F1', marginTop: 0 }]}>N 882-102 WB • Tomorrow 09:00–17:00</Text>
+                    <Text style={styles.offerRoute}>Toyota Hilux 4x4</Text>
+                    <Text style={[styles.offerSub, { color: '#64748B', marginTop: 0 }]}>N 882-102 WB • Tomorrow 09:00–17:00</Text>
                   </View>
                 </View>
 
@@ -791,7 +824,7 @@ export default function App() {
                       Alert.alert('Approved!', 'Vehicle reserved and locked in calendar.');
                     }}
                   >
-                    <Text style={styles.btnText}>✓ Approve & Reserve</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><Check size={14} color="#FFF" /><Text style={styles.btnText}>Approve & Reserve</Text></View>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={styles.rejectBtn}
@@ -800,14 +833,14 @@ export default function App() {
                       Alert.alert('Declined', 'Request declined and requester notified.');
                     }}
                   >
-                    <Text style={styles.btnText}>✕ Decline</Text>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}><X size={14} color="#FFF" /><Text style={styles.btnText}>Decline</Text></View>
                   </TouchableOpacity>
                 </View>
               </View>
             ) : (
               <View style={[styles.manifestCard, { marginBottom: 14 }]}>
                 <Text style={{ fontSize: 13, fontWeight: '700', color: approval1Done === 'approved' ? '#059669' : '#DC2626', textAlign: 'center' }}>
-                  {approval1Done === 'approved' ? '✅ Request Approved — Vehicle Reserved' : '❌ Request Declined'}
+                  {approval1Done === 'approved' ? 'Request Approved — Vehicle Reserved' : 'Request Declined'}
                 </Text>
               </View>
             )}
@@ -833,7 +866,7 @@ export default function App() {
                   style={styles.primaryButton}
                   onPress={() => setPoolModalVisible(true)}
                 >
-                  <Text style={styles.primaryButtonText}>📅 Book for Business Trip</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Calendar size={14} color="#FFF" /><Text style={styles.primaryButtonText}>Book for Business Trip</Text></View>
                 </TouchableOpacity>
                 {poolRequested && (
                   <TouchableOpacity
@@ -867,7 +900,7 @@ export default function App() {
                   style={styles.primaryButton}
                   onPress={() => Alert.alert('Book VW Polo', 'Submit a request for the VW Polo Vivo sedan.')}
                 >
-                  <Text style={styles.primaryButtonText}>📅 Book for Business Trip</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Calendar size={14} color="#FFF" /><Text style={styles.primaryButtonText}>Book for Business Trip</Text></View>
                 </TouchableOpacity>
               </View>
             </View>
@@ -878,7 +911,7 @@ export default function App() {
         {activeTab === 'INSPECTOR' && (
           <View style={styles.section}>
             {/* Header Banner */}
-            <View style={[styles.driverHeroBanner, { backgroundColor: '#4C1D95' }]}>
+            <View style={styles.driverHeroBanner}>
               <Text style={styles.driverHeroBadge}>VEHICLE QUALITY CONTROL • INSPECTOR CONSOLE</Text>
               <Text style={styles.driverTitle}>Inspector Portal: Maria Amadhila</Text>
               <Text style={styles.driverSub}>Perform post-return inspections & enforce vehicle availability quality gates.</Text>
@@ -888,7 +921,7 @@ export default function App() {
             {completedInspections.length > 0 && (
               <View style={[styles.manifestCard, { backgroundColor: '#D1FAE5', borderColor: '#6EE7B7' }]}>
                 <Text style={{ fontSize: 12, fontWeight: '800', color: '#065F46' }}>
-                  ✅ Inspection Completed for {completedInspections[0].reg}! Result: {completedInspections[0].result}.
+                  Inspection Completed for {completedInspections[0].reg}! Result: {completedInspections[0].result}.
                 </Text>
               </View>
             )}
@@ -909,7 +942,7 @@ export default function App() {
                 <Text style={[styles.tripRouteText, { fontSize: 14, marginBottom: 4 }]}>{v.make} {v.model}</Text>
                 <Text style={styles.passengerDept}>Odometer: {v.mileage} km • {v.fuel}</Text>
                 <TouchableOpacity
-                  style={[styles.primaryButton, { marginTop: 12, backgroundColor: '#7C3AED' }]}
+                  style={styles.primaryButton}
                   onPress={() => {
                     setActiveInspectVehicle(v.id);
                     setInspOdometer(v.mileage.replace(',', ''));
@@ -917,7 +950,7 @@ export default function App() {
                     setInspNotes('');
                   }}
                 >
-                  <Text style={styles.primaryButtonText}>🛡️ Perform Inspection</Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><ShieldCheck size={14} color="#FFF" /><Text style={styles.primaryButtonText}>Perform Inspection</Text></View>
                 </TouchableOpacity>
               </View>
             ))}
@@ -959,7 +992,10 @@ export default function App() {
                     </Text>
                   </View>
                   <TouchableOpacity onPress={() => setActiveInspectVehicle(null)}>
-                    <Text style={{ color: '#64748B', fontWeight: 'bold', fontSize: 13 }}>✕ Close</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <X size={16} color="#64748B" />
+                      <Text style={{ color: '#64748B', fontWeight: 'bold', fontSize: 13 }}>Close</Text>
+                    </View>
                   </TouchableOpacity>
                 </View>
 
@@ -1003,7 +1039,7 @@ export default function App() {
                         onPress={() => setInspDecision(d)}
                       >
                         <Text style={{ fontSize: 10, fontWeight: '900', color: inspDecision === d ? '#FFF' : '#64748B' }}>
-                          {d === 'PASSED' ? 'PASSED ✅' : d === 'FAILED' ? 'FAILED ❌' : 'ATTENTION ⚠️'}
+                          {d === 'PASSED' ? 'PASSED' : d === 'FAILED' ? 'FAILED' : 'ATTENTION'}
                         </Text>
                       </TouchableOpacity>
                     ))}
@@ -1028,7 +1064,7 @@ export default function App() {
                       <Text style={{ color: '#64748B', fontWeight: 'bold', fontSize: 12 }}>Cancel</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      style={[styles.approveBtn, { flex: 1, backgroundColor: '#7C3AED' }]}
+                      style={styles.approveBtn}
                       onPress={() => {
                         const vehicleNames: Record<string, { name: string; reg: string }> = {
                           'veh-bus-1': { name: 'Toyota Coaster', reg: 'N 142-991 WB' },
@@ -1039,7 +1075,7 @@ export default function App() {
                         setCompletedInspections(prev => [{ id: `insp-${Date.now()}`, vehicle: v.name, reg: v.reg, odometer: inspOdometer, fuel: inspFuel, result: inspDecision }, ...prev]);
                         setActiveInspectVehicle(null);
                         Alert.alert(
-                          'Inspection Submitted ✅',
+                          'Inspection Submitted',
                           `${v.name} (${v.reg})\nResult: ${inspDecision}\nVehicle set to: ${inspDecision === 'PASSED' ? 'AVAILABLE' : 'UNDER_MAINTENANCE'}`
                         );
                       }}
@@ -1189,9 +1225,9 @@ export default function App() {
             {/* Save Button */}
             <TouchableOpacity
               style={[styles.primaryButton, { paddingVertical: 16, borderRadius: 16, marginTop: 4 }]}
-              onPress={() => Alert.alert('Rules Saved ✅', `Business rules updated across AGL fleet system!\n\n• Cutoff: ${ruleCutoffHours}h\n• Auto-Approve: ${ruleAutoApprove ? 'ON' : 'OFF'}\n• Max Seats: ${ruleMaxSeats}\n• Driver Timeout: ${ruleDriverTimeout} min\n• Booking Window: ${ruleBookingWindow} days\n• Inspection Trigger: ${ruleInspectorThreshold} KM`)}
+              onPress={() => Alert.alert('Rules Saved', `Business rules updated across AGL fleet system!\n\n• Cutoff: ${ruleCutoffHours}h\n• Auto-Approve: ${ruleAutoApprove ? 'ON' : 'OFF'}\n• Max Seats: ${ruleMaxSeats}\n• Driver Timeout: ${ruleDriverTimeout} min\n• Booking Window: ${ruleBookingWindow} days\n• Inspection Trigger: ${ruleInspectorThreshold} KM`)}
             >
-              <Text style={styles.primaryButtonText}>💾 Save All Rule Configurations</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Save size={14} color="#FFF" /><Text style={styles.primaryButtonText}>Save All Rule Configurations</Text></View>
             </TouchableOpacity>
           </View>
         )}
@@ -1202,35 +1238,35 @@ export default function App() {
       <View style={styles.tabBar}>
         {isTabAllowed('RIDER') && (
           <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('RIDER')}>
-            <Text style={[styles.tabIcon, activeTab === 'RIDER' && styles.tabActive]}>🧑‍💼</Text>
+            <LayoutDashboard size={20} color={activeTab === 'RIDER' ? GOLD : '#94A3B8'} />
             <Text style={[styles.tabLabel, activeTab === 'RIDER' && styles.tabActive]}>Rider Portal</Text>
           </TouchableOpacity>
         )}
 
         {isTabAllowed('DRIVER') && (
           <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('DRIVER')}>
-            <Text style={[styles.tabIcon, activeTab === 'DRIVER' && styles.tabActive]}>📋</Text>
+            <ClipboardList size={20} color={activeTab === 'DRIVER' ? GOLD : '#94A3B8'} />
             <Text style={[styles.tabLabel, activeTab === 'DRIVER' && styles.tabActive]}>Driver Console</Text>
           </TouchableOpacity>
         )}
 
         {isTabAllowed('MANAGER') && (
           <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('MANAGER')}>
-            <Text style={[styles.tabIcon, activeTab === 'MANAGER' && styles.tabActive]}>👔</Text>
+            <Briefcase size={20} color={activeTab === 'MANAGER' ? GOLD : '#94A3B8'} />
             <Text style={[styles.tabLabel, activeTab === 'MANAGER' && styles.tabActive]}>Manager Hub</Text>
           </TouchableOpacity>
         )}
 
         {isTabAllowed('INSPECTOR') && (
           <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('INSPECTOR')}>
-            <Text style={[styles.tabIcon, activeTab === 'INSPECTOR' && styles.tabActive]}>🛡️</Text>
+            <ShieldCheck size={20} color={activeTab === 'INSPECTOR' ? GOLD : '#94A3B8'} />
             <Text style={[styles.tabLabel, activeTab === 'INSPECTOR' && styles.tabActive]}>Inspector Gate</Text>
           </TouchableOpacity>
         )}
 
         {isTabAllowed('ADMIN') && (
           <TouchableOpacity style={styles.tabItem} onPress={() => setActiveTab('ADMIN')}>
-            <Text style={[styles.tabIcon, activeTab === 'ADMIN' && styles.tabActive]}>⚙️</Text>
+            <Settings size={20} color={activeTab === 'ADMIN' ? GOLD : '#94A3B8'} />
             <Text style={[styles.tabLabel, activeTab === 'ADMIN' && styles.tabActive]}>Admin & Rules</Text>
           </TouchableOpacity>
         )}
@@ -1246,7 +1282,7 @@ export default function App() {
             {/* Top-Down Bus Layout Diagram */}
             <View style={styles.busDiagramContainer}>
               <View style={styles.driverCabBox}>
-                <Text style={styles.driverCabText}>🚌 FRONT • DRIVER CAB</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}><Bus size={14} color={NAVY} /><Text style={styles.driverCabText}>FRONT • DRIVER CAB</Text></View>
               </View>
 
               <View style={styles.seatGrid}>
@@ -1386,12 +1422,20 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   logoBox: {
-    width: 38,
-    height: 38,
+    width: 40,
+    height: 40,
     borderRadius: 10,
-    backgroundColor: GOLD,
+    backgroundColor: NAVY,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: GOLD,
+    padding: 2,
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
   },
   logoText: {
     color: NAVY,
@@ -2151,15 +2195,21 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   authLogoBox: {
-    width: 60,
-    height: 60,
+    width: 72,
+    height: 72,
     borderRadius: 18,
-    backgroundColor: '#FFF',
+    backgroundColor: NAVY,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
     borderWidth: 2,
     borderColor: GOLD,
+    overflow: 'hidden',
+    padding: 4,
+  },
+  authLogoImage: {
+    width: '100%',
+    height: '100%',
   },
   authLogoText: {
     fontSize: 22,

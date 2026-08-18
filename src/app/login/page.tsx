@@ -34,8 +34,8 @@ export default function LoginPage() {
       {/* Header Branding */}
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
         <div className="flex justify-center items-center space-x-3 mb-4">
-          <div className="w-14 h-14 bg-gradient-to-br from-[#1C355E] to-slate-900 border-2 border-[#EED58E] rounded-2xl flex items-center justify-center shadow-2xl">
-            <span className="text-[#EED58E] font-black text-2xl tracking-wider">AGL</span>
+          <div className="w-16 h-16 bg-[#1C355E] border-2 border-[#EED58E] rounded-2xl flex items-center justify-center p-1.5 shadow-2xl backdrop-blur-md">
+            <img src="/agloggo.png" alt="AGL Logo" className="w-full h-full object-contain" />
           </div>
         </div>
 

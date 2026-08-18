@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Bus, ClipboardList, CheckSquare, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Bus, ClipboardList, CheckSquare, AlertTriangle, ArrowRight, ShieldCheck, CheckCircle2, Play, MapPin, DoorClosed } from 'lucide-react';
 import { INITIAL_BUS_TRIPS, INITIAL_BUS_BOOKINGS, INITIAL_VEHICLES, INITIAL_EMPLOYEES } from '@/lib/store';
 import { getActiveUser } from '@/lib/auth';
 import { Employee, BusTrip, BusBooking } from '@/types';
@@ -113,8 +113,8 @@ export default function DriverDashboard() {
       </div>
 
       {actionMessage && (
-        <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 font-extrabold text-xs rounded-2xl animate-in fade-in">
-          ✅ {actionMessage}
+        <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 font-extrabold text-xs rounded-2xl animate-in fade-in flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-700" /> {actionMessage}
         </div>
       )}
 
@@ -190,45 +190,45 @@ export default function DriverDashboard() {
                     {t.status === 'SCHEDULED' && (
                       <button
                         onClick={() => handleAdvanceTripState(t.id, 'BOARDING')}
-                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-xl shadow-md transition-all animate-bounce"
+                        className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
                       >
-                        START BOARDING 🚌
+                        <Bus className="w-4 h-4" /> START BOARDING
                       </button>
                     )}
 
                     {t.status === 'BOARDING' && (
                       <button
                         onClick={() => handleAdvanceTripState(t.id, 'EN_ROUTE')}
-                        className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs rounded-xl shadow-md"
+                        className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-1.5"
                       >
-                        DEPART / START TRIP 🟢
+                        <Play className="w-4 h-4" /> DEPART / START TRIP
                       </button>
                     )}
 
                     {t.status === 'EN_ROUTE' && (
                       <button
                         onClick={() => handleAdvanceTripState(t.id, 'ARRIVED')}
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs rounded-xl shadow-md"
+                        className="px-4 py-2 bg-[#1C355E] hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-1.5"
                       >
-                        ARRIVED 📍
+                        <MapPin className="w-4 h-4" /> ARRIVED
                       </button>
                     )}
 
                     {t.status === 'ARRIVED' && (
                       <button
                         onClick={() => handleAdvanceTripState(t.id, 'EMPTYING')}
-                        className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs rounded-xl shadow-md"
+                        className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-1.5"
                       >
-                        EMPTY BUS 🚪
+                        <DoorClosed className="w-4 h-4" /> EMPTY BUS
                       </button>
                     )}
 
                     {t.status === 'EMPTYING' && (
                       <button
                         onClick={() => handleAdvanceTripState(t.id, 'COMPLETED')}
-                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md"
+                        className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-1.5"
                       >
-                        COMPLETE TRIP ✅
+                        <CheckCircle2 className="w-4 h-4" /> COMPLETE TRIP
                       </button>
                     )}
                   </div>

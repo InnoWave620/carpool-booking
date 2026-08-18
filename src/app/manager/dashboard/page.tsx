@@ -135,7 +135,7 @@ export default function ManagerDashboard() {
   return (
     <div className="space-y-6 font-sans">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-indigo-900 via-[#1C355E] to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="bg-gradient-to-r from-[#1C355E] via-slate-900 to-slate-950 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <span className="bg-[#EED58E]/20 text-[#EED58E] border border-amber-400/30 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
             Manager Control Hub • Walvis Bay Fleet
@@ -159,10 +159,10 @@ export default function ManagerDashboard() {
       <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center space-x-2">
-            <CheckSquare className="w-5 h-5 text-indigo-600" />
+            <CheckSquare className="w-5 h-5 text-[#1C355E]" />
             <h2 className="text-base font-black text-[#1C355E]">Manager Approval Inbox</h2>
           </div>
-          <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+          <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-slate-100 text-[#1C355E] border border-slate-200">
             {pendingApprovals.length} Pending
           </span>
         </div>
@@ -227,7 +227,7 @@ export default function ManagerDashboard() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-xl bg-[#1C355E]/10 flex items-center justify-center text-[#1C355E] font-black">
-                      🚗
+                      <Car className="w-5 h-5 text-[#1C355E]" />
                     </div>
                     <div>
                       <p className="text-sm font-black text-[#1C355E]">{v.make} {v.model}</p>
@@ -265,8 +265,8 @@ export default function ManagerDashboard() {
           <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
               <h3 className="text-base font-black text-[#1C355E]">Book Pool Fleet Vehicle</h3>
-              <button onClick={() => setBookingModalVisible(false)} className="text-slate-400 hover:text-slate-700 text-xs font-bold">
-                ✕ Close
+              <button onClick={() => setBookingModalVisible(false)} className="text-slate-400 hover:text-slate-700 text-xs font-bold flex items-center gap-1">
+                <X className="w-4 h-4" /> Close
               </button>
             </div>
 

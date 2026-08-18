@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, AlertCircle, CheckCircle2, XCircle, Camera, Wrench } from 'lucide-react';
+import { ShieldCheck, AlertCircle, CheckCircle2, XCircle, Camera, Wrench, X } from 'lucide-react';
 import { INITIAL_VEHICLES, INITIAL_POOL_REQUESTS, INITIAL_INSPECTIONS } from '@/lib/store';
 import { getActiveUser } from '@/lib/auth';
 import { Employee, Vehicle, VehicleInspection, PoolVehicleRequest } from '@/types';
@@ -104,9 +104,9 @@ export default function InspectorDashboard() {
   return (
     <div className="space-y-6 font-sans">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-purple-900 via-[#1C355E] to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="bg-gradient-to-r from-[#1C355E] via-slate-900 to-slate-950 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <span className="bg-purple-500/20 text-purple-200 border border-purple-400/30 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+          <span className="bg-[#2DD4BF]/10 text-[#2DD4BF] border border-[#2DD4BF]/30 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
             Vehicle Quality Control • Inspector Console
           </span>
           <h1 className="text-2xl sm:text-3xl font-black mt-2">Inspector Portal: {user.firstName} {user.lastName}</h1>
@@ -117,8 +117,8 @@ export default function InspectorDashboard() {
       </div>
 
       {notification && (
-        <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 font-extrabold text-xs rounded-2xl animate-in fade-in">
-          ✅ {notification}
+        <div className="p-4 bg-emerald-100 border border-emerald-300 text-emerald-900 font-extrabold text-xs rounded-2xl animate-in fade-in flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-700" /> {notification}
         </div>
       )}
 
@@ -126,7 +126,7 @@ export default function InspectorDashboard() {
       <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-slate-100">
           <div className="flex items-center space-x-2">
-            <ShieldCheck className="w-5 h-5 text-purple-600" />
+            <ShieldCheck className="w-5 h-5 text-[#1C355E]" />
             <h2 className="text-base font-black text-[#1C355E]">Vehicle Post-Return Inspection Queue</h2>
           </div>
         </div>
@@ -153,9 +153,9 @@ export default function InspectorDashboard() {
 
                 <button
                   onClick={() => setActiveInspectionVehicle(v)}
-                  className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center space-x-2"
+                  className="w-full py-2.5 bg-[#1C355E] hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center space-x-2"
                 >
-                  <ShieldCheck className="w-4 h-4 text-purple-200" />
+                  <ShieldCheck className="w-4 h-4 text-[#EED58E]" />
                   <span>Perform Inspection</span>
                 </button>
               </div>
@@ -194,8 +194,8 @@ export default function InspectorDashboard() {
                 <h3 className="text-base font-black text-[#1C355E]">Vehicle Post-Return Inspection</h3>
                 <p className="text-xs text-slate-500 font-bold">{activeInspectionVehicle.make} {activeInspectionVehicle.model} ({activeInspectionVehicle.registrationNumber})</p>
               </div>
-              <button onClick={() => setActiveInspectionVehicle(null)} className="text-slate-400 hover:text-slate-700 text-xs font-bold">
-                ✕ Close
+              <button onClick={() => setActiveInspectionVehicle(null)} className="text-slate-400 hover:text-slate-700 text-xs font-bold flex items-center gap-1">
+                <X className="w-4 h-4" /> Close
               </button>
             </div>
 
@@ -228,19 +228,19 @@ export default function InspectorDashboard() {
                     onClick={() => setPassDecision('PASSED')}
                     className={`py-2 rounded-xl text-xs font-extrabold border ${passDecision === 'PASSED' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
                   >
-                    PASSED ✅
+                    PASSED
                   </button>
                   <button
                     onClick={() => setPassDecision('FAILED')}
                     className={`py-2 rounded-xl text-xs font-extrabold border ${passDecision === 'FAILED' ? 'bg-rose-600 text-white border-rose-600' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
                   >
-                    FAILED ❌
+                    FAILED
                   </button>
                   <button
                     onClick={() => setPassDecision('REQUIRES_ATTENTION')}
                     className={`py-2 rounded-xl text-xs font-extrabold border ${passDecision === 'REQUIRES_ATTENTION' ? 'bg-amber-500 text-white border-amber-500' : 'bg-slate-50 text-slate-700 border-slate-200'}`}
                   >
-                    ATTENTION ⚠️
+                    ATTENTION
                   </button>
                 </div>
               </div>
@@ -266,7 +266,7 @@ export default function InspectorDashboard() {
               </button>
               <button
                 onClick={handleCompleteInspection}
-                className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-extrabold shadow-md"
+                className="flex-1 py-2.5 bg-[#1C355E] hover:bg-slate-800 text-white rounded-xl text-xs font-extrabold shadow-md"
               >
                 Submit Inspection
               </button>

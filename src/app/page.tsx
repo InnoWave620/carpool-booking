@@ -57,7 +57,7 @@ export default function DashboardPage() {
             <span>AGL Namibia • Walvis Bay Transport Operations</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-white leading-tight">
-            Welcome back, {user.firstName}! 👋
+            Welcome back, {user.firstName}!
           </h1>
           <p className="text-xs sm:text-sm text-slate-200 mt-2 leading-relaxed">
             Centralized shuttle seat booking and pool vehicle fleet management platform.
@@ -126,7 +126,7 @@ export default function DashboardPage() {
             <p className="text-lg font-black text-[#1C355E] mt-0.5">{poolRequests.filter(r => r.status === 'PENDING_MANAGER_APPROVAL').length} Pending</p>
             <p className="text-xs text-slate-500 font-medium mt-0.5">Trip approvals</p>
           </div>
-          <div className="p-3 bg-purple-100 text-purple-800 rounded-2xl">
+          <div className="p-3 bg-[#1C355E]/10 text-[#1C355E] rounded-2xl">
             <CheckSquare className="w-6 h-6" />
           </div>
         </div>

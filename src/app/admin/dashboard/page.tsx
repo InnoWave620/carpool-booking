@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Settings, Users, Car, Bus, FileText, Sliders, ShieldAlert, BarChart3, Database } from 'lucide-react';
+import { Settings, Users, Car, Bus, FileText, Sliders, ShieldAlert, BarChart3, Database, CheckCircle2 } from 'lucide-react';
 import { INITIAL_VEHICLES, INITIAL_DRIVERS, INITIAL_EMPLOYEES, INITIAL_BUS_TRIPS, INITIAL_AUDIT_EVENTS } from '@/lib/store';
 import { getActiveUser } from '@/lib/auth';
 import { Employee, Vehicle } from '@/types';
@@ -31,7 +31,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 font-sans">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-[#1C355E] via-slate-900 to-indigo-950 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="bg-gradient-to-r from-[#1C355E] via-slate-900 to-slate-950 text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <span className="bg-amber-400/20 text-[#EED58E] border border-amber-400/30 text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
             System Administration • AGL Transport Hub
@@ -83,7 +83,7 @@ export default function AdminDashboard() {
             <div className="p-5 bg-white rounded-3xl border border-slate-200 shadow-sm">
               <p className="text-xs font-extrabold text-slate-400 uppercase">Active Drivers</p>
               <p className="text-2xl font-black text-[#1C355E] mt-1">{INITIAL_DRIVERS.length} Drivers</p>
-              <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded mt-2 inline-block">Walvis Bay Hub</span>
+              <span className="text-[10px] font-bold text-[#1C355E] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded mt-2 inline-block">Walvis Bay Hub</span>
             </div>
 
             <div className="p-5 bg-white rounded-3xl border border-slate-200 shadow-sm">
@@ -95,7 +95,7 @@ export default function AdminDashboard() {
             <div className="p-5 bg-white rounded-3xl border border-slate-200 shadow-sm">
               <p className="text-xs font-extrabold text-slate-400 uppercase">Audit Events Logged</p>
               <p className="text-2xl font-black text-[#1C355E] mt-1">{INITIAL_AUDIT_EVENTS.length} Events</p>
-              <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded mt-2 inline-block">Compliance Verified</span>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded mt-2 inline-block border border-emerald-200">Compliance Verified</span>
             </div>
           </div>
         </div>
@@ -129,8 +129,8 @@ export default function AdminDashboard() {
           </div>
 
           {configSaved && (
-            <div className="p-3 bg-emerald-100 text-emerald-800 font-extrabold text-xs rounded-xl">
-              ✅ Transport Business Rules updated & saved to Database!
+            <div className="p-3 bg-emerald-100 text-emerald-800 font-extrabold text-xs rounded-xl flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-700" /> Transport Business Rules updated & saved to Database!
             </div>
           )}
 
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
             {INITIAL_AUDIT_EVENTS.map((a) => (
               <div key={a.id} className="py-3 flex items-center justify-between text-xs">
                 <div>
-                  <span className="font-extrabold text-indigo-900 bg-indigo-50 px-2 py-0.5 rounded text-[10px] mr-2">
+                  <span className="font-extrabold text-[#1C355E] bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-[10px] mr-2">
                     {a.action}
                   </span>
                   <span className="font-bold text-slate-800">{a.entityType} ({a.entityId})</span>
@@ -214,12 +214,12 @@ export default function AdminDashboard() {
             <div className="p-4 border rounded-2xl bg-slate-50 space-y-2">
               <h4 className="text-xs font-black text-[#1C355E]">Shuttle Seat Utilization Report</h4>
               <p className="text-xs text-slate-500">Total Bookings: 142 • Seat Occupancy: 88.4%</p>
-              <button className="text-[10px] font-extrabold text-indigo-600 underline">Export CSV Report</button>
+              <button className="text-[10px] font-extrabold text-[#1C355E] hover:underline">Export CSV Report</button>
             </div>
             <div className="p-4 border rounded-2xl bg-slate-50 space-y-2">
               <h4 className="text-xs font-black text-[#1C355E]">Pool Vehicle Downtime & Inspections Report</h4>
               <p className="text-xs text-slate-500">Inspection Pass Rate: 96.2% • Maintenance Hours: 4h</p>
-              <button className="text-[10px] font-extrabold text-indigo-600 underline">Export CSV Report</button>
+              <button className="text-[10px] font-extrabold text-[#1C355E] hover:underline">Export CSV Report</button>
             </div>
           </div>
         </div>
